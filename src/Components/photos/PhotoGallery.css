@@ -1,0 +1,255 @@
+.photo-gallery {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.gallery-title {
+  text-align: center;
+  margin-bottom: 40px;
+  color: #333;
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+.photo-grid {
+  column-count: auto;
+  column-width: 350px;
+  column-gap: 20px;
+  width: 100%;
+}
+
+.photo-item {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #f8f9fa;
+  margin-bottom: 20px;
+  break-inside: avoid;
+  display: inline-block;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.photo-item:not(.loading):not(.error) {
+  cursor: pointer;
+}
+
+.photo-item:not(.loading):not(.error):hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.photo-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.photo-item:not(.loading):not(.error):hover img {
+  transform: scale(1.05);
+}
+
+/* Ensure container has proper height during loading */
+.photo-item.loading {
+  min-height: 200px;
+}
+
+.loading, .empty-state {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.loading {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Load More Button */
+.load-more-container {
+  text-align: center;
+  margin: 50px 0 30px 0;
+}
+
+.load-more-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  min-width: 200px;
+}
+
+.load-more-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.load-more-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.load-more-btn.loading {
+  position: relative;
+  color: transparent;
+}
+
+.load-more-btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.end-message {
+  text-align: center;
+  padding: 30px;
+  font-size: 1.1rem;
+  color: #666;
+  font-weight: 500;
+  border-top: 1px solid #eee;
+  margin-top: 40px;
+}
+
+/* Photo loading and error states */
+.photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.photo-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e0e0e0;
+  border-top: 2px solid #667eea;
+  border-radius: 50%;
+  animation: photoSpin 0.8s linear infinite;
+  margin-bottom: 8px;
+}
+
+@keyframes photoSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.photo-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background: #ffeaa7;
+  color: #636e72;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 20px;
+}
+
+.photo-error span:first-child {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.photo-error button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s ease;
+}
+
+.photo-error button:hover {
+  background: #5a67d8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .photo-grid {
+    column-width: 300px;
+    column-gap: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .photo-gallery {
+    padding: 15px;
+  }
+
+  .gallery-title {
+    font-size: 2rem;
+    margin-bottom: 30px;
+  }
+
+  .photo-grid {
+    column-width: 250px;
+    column-gap: 15px;
+  }
+
+  .photo-item {
+    border-radius: 12px;
+    margin-bottom: 15px;
+  }
+
+  .load-more-btn {
+    padding: 12px 30px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .photo-grid {
+    column-width: 100%;
+    column-count: 1;
+    column-gap: 0;
+  }
+
+  .photo-item {
+    max-width: 100%;
+    margin-bottom: 12px;
+  }
+
+  .gallery-title {
+    font-size: 1.8rem;
+  }
+}

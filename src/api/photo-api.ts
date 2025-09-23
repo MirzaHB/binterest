@@ -1,0 +1,66 @@
+import apiClient from './api-client';
+
+export interface UploadResponse {
+  message: string;
+  url: string;
+  blobName: string;
+}
+
+export interface PhotoMetadata {
+  url: string;
+  proxyUrl?: string; // Fallback URL if direct URL fails
+  description?: string;
+  blobName: string;
+  lastModified?: string;
+}
+
+export const uploadPhoto = async (file: File): Promise<UploadResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await apiClient.post<UploadResponse>('/photos/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+};
+
+// Backend interface (what actually comes from your C# API)
+interface BackendPhotoMetadata {
+  url: string;
+  description?: string;
+  blobName: string;
+  lastModified?: string;
+}
+
+export const getPhotos = async (limit: number = 5, skip: number = 0): Promise<PhotoMetadata[]> => {
+  try {
+    const response = await apiClient.get<BackendPhotoMetadata[]>(`/photos?limit=${limit}&skip=${skip}`);
+
+    // Check if we should use direct URLs or proxy
+    const useDirectUrls = true; // Set to false to force proxy usage (avoiding 404s)
+
+    const transformedPhotos = response.data.map(photo => ({
+      url: useDirectUrls ? photo.url : `/api/photos/${photo.blobName}/image`,
+      proxyUrl: `/api/photos/${photo.blobName}/image`, // Always provide fallback
+      description: photo.description,
+      blobName: photo.blobName,
+      lastModified: photo.lastModified
+    }));
+
+    console.log('🚀 Using Direct Azure URLs for maximum speed!');
+
+    return transformedPhotos;
+  } catch (error) {
+    console.error('Error in getPhotos:', error);
+    throw error;
+  }
+};
+
+export const getUploadSas = async (): Promise<{ sasUri: string }> => {
+  const response = await apiClient.get<{ sasUri: string }>('/photos/upload-sas');
+  return response.data;
+};
+
