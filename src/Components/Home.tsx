@@ -1,100 +1,116 @@
 import React from 'react';
-import { useIsAuthenticated, useMsal } from '@azure/msal-react';
 import { Link } from 'react-router-dom';
-import LoginButton from './auth/LoginButton';
-import LogoutButton from './auth/LogoutButton';
 import './Home.css';
 
 const Home: React.FC = () => {
-  const isAuthenticated = useIsAuthenticated();
-  const { accounts } = useMsal();
-
   return (
     <div className="home-container">
       <div className="hero-section">
         <div className="hero-content">
-          <h1 className="hero-title">
-            Hi, I'm <span className="brand-highlight">Hassan Baig</span>
-          </h1>
+          <div className="greeting-animation">
+            <span className="wave">👋</span>
+            <h1 className="hero-title">
+              Hi, I'm <span className="brand-highlight">Hassan Baig</span>
+            </h1>
+          </div>
+
           <p className="hero-subtitle">
-            A passionate developer, photographer, and creative storyteller. Welcome to my digital portfolio where I share my journey through code, captures, and thoughts.
+            A passionate developer and creative storyteller crafting digital experiences that inspire and connect.
           </p>
 
           <div className="hero-actions">
             <Link to="/photos" className="action-button primary">
-              <span className="button-icon">🖼️</span>
-              View My Work
+              <span className="button-icon">📸</span>
+              Explore Gallery
             </Link>
             <Link to="/blog" className="action-button secondary">
-              <span className="button-icon">📝</span>
-              Read My Blog
+              <span className="button-icon">✍️</span>
+              Read Stories
             </Link>
-          </div>
-
-          <div className="skills-section">
-            <h3>What I Do</h3>
-            <div className="skills-grid">
-              <div className="skill-item">
-                <span className="skill-icon">💻</span>
-                <span>Full-Stack Development</span>
-              </div>
-              <div className="skill-item">
-                <span className="skill-icon">📸</span>
-                <span>Photography</span>
-              </div>
-              <div className="skill-item">
-                <span className="skill-icon">🎨</span>
-                <span>UI/UX Design</span>
-              </div>
-              <div className="skill-item">
-                <span className="skill-icon">☁️</span>
-                <span>Cloud Solutions</span>
-              </div>
-            </div>
           </div>
         </div>
 
-        <div className="hero-image">
-          <div className="profile-section">
-            <div className="profile-placeholder">
-              <span className="profile-icon">👨‍💻</span>
-              <p>Your photo here</p>
+        <div className="hero-visual">
+          <div className="floating-elements">
+            <div className="float-item code">{'<>'}</div>
+            <div className="float-item camera">📷</div>
+            <div className="float-item design">✨</div>
+            <div className="float-item rocket">🚀</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="about-section">
+        <div className="section-header">
+          <h2>About Me</h2>
+          <div className="section-line"></div>
+        </div>
+
+        <div className="about-content">
+          <div className="about-text">
+            <p className="about-intro">
+              Welcome to my corner of the internet! I'm a full-stack developer with a passion for creating meaningful digital experiences.
+            </p>
+
+            <p>
+              When I'm not coding, you'll find me behind the camera capturing life's beautiful moments, exploring new technologies,
+              or writing about the intersection of creativity and technology. I believe that great software isn't just functional—it's elegant,
+              intuitive, and tells a story.
+            </p>
+
+            <p>
+              My journey spans from building scalable cloud applications to crafting pixel-perfect user interfaces.
+              I love solving complex problems with simple, elegant solutions, and I'm always excited to learn something new.
+            </p>
+
+            <div className="current-focus">
+              <h4>Currently exploring:</h4>
+              <div className="focus-tags">
+                <span className="tag">React & TypeScript</span>
+                <span className="tag">Azure Cloud</span>
+                <span className="tag">Photography</span>
+                <span className="tag">UI/UX Design</span>
+              </div>
             </div>
-            <div className="social-links">
-              <a href="#" className="social-link">
-                <span>💼</span>
-                LinkedIn
-              </a>
-              <a href="#" className="social-link">
-                <span>📧</span>
-                Contact
-              </a>
-              <a href="#" className="social-link">
-                <span>📱</span>
-                GitHub
-              </a>
+          </div>
+
+          <div className="about-stats">
+            <div className="stat-item">
+              <div className="stat-number">5+</div>
+              <div className="stat-label">Years Coding</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">50+</div>
+              <div className="stat-label">Projects Built</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">∞</div>
+              <div className="stat-label">Ideas Brewing</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="auth-section">
-        {isAuthenticated ? (
-          <div className="auth-card authenticated">
-            <h3>Welcome back!</h3>
-            <p className="user-info">
-              <span className="user-icon">👤</span>
-              {accounts[0]?.username}
-            </p>
-            <LogoutButton />
-          </div>
-        ) : (
-          <div className="auth-card">
-            <h3>Get Started</h3>
-            <p>Sign in to upload and manage your photos</p>
-            <LoginButton />
-          </div>
-        )}
+      <div className="connect-section">
+        <h3>Let's Connect</h3>
+        <p>I'm always open to interesting conversations and new opportunities</p>
+        <div className="social-grid">
+          <a href="https://linkedin.com/in/hassan-baig" className="social-card" target="_blank" rel="noopener noreferrer">
+            <span className="social-icon">💼</span>
+            <span className="social-name">LinkedIn</span>
+            <span className="social-desc">Professional network</span>
+          </a>
+          <a href="mailto:hassan@example.com" className="social-card">
+            <span className="social-icon">📧</span>
+            <span className="social-name">Email</span>
+            <span className="social-desc">Direct contact</span>
+          </a>
+          <a href="https://github.com/hassan-baig" className="social-card" target="_blank" rel="noopener noreferrer">
+            <span className="social-icon">🐙</span>
+            <span className="social-name">GitHub</span>
+            <span className="social-desc">Code & projects</span>
+          </a>
+        </div>
       </div>
     </div>
   );

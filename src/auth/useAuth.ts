@@ -21,7 +21,7 @@ export const useAuth = () => {
   }, [isAuthenticated, account, instance]);
 
   // Define getAccessToken first
-  const getAccessToken = async (): Promise<string | null> => {
+  const getAccessToken = React.useCallback(async (): Promise<string | null> => {
     if (!account) return null;
 
     try {
@@ -34,7 +34,7 @@ export const useAuth = () => {
       console.error('Failed to acquire access token:', error);
       return null;
     }
-  };
+  }, [account, instance]);
 
 
   // Define getUserInfoFromAPI
@@ -63,7 +63,7 @@ export const useAuth = () => {
       console.error('Error calling user info API:', error);
       return null;
     }
-  }, [account, instance]);
+  }, [getAccessToken]);
 
   // Fetch user info from API when authenticated
   React.useEffect(() => {

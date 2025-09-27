@@ -1,10 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { getPhotos, PhotoMetadata } from '../../api/photo-api';
 import PhotoModal from './PhotoModal';
 import './PhotoGallery.css';
 
 interface ImageLoadState {
   [key: string]: 'loading' | 'loaded' | 'error';
+}
+
+interface Column {
+  photos: PhotoMetadata[];
+  height: number;
 }
 
 const PhotoGallery: React.FC = () => {
@@ -16,7 +21,61 @@ const PhotoGallery: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoadStates, setImageLoadStates] = useState<ImageLoadState>({});
   const [error, setError] = useState<string | null>(null);
+  const [columns, setColumns] = useState<Column[]>([]);
+  const [columnCount, setColumnCount] = useState(3);
+  const galleryRef = useRef<HTMLDivElement>(null);
   const photosPerPage = 5;
+
+  // Calculate optimal column count based on screen width
+  const calculateColumnCount = useCallback(() => {
+    if (!galleryRef.current) return 3;
+
+    const containerWidth = galleryRef.current.offsetWidth;
+    const columnWidth = 350; // Base column width
+    const gap = 20; // Gap between columns
+
+    const possibleColumns = Math.floor((containerWidth + gap) / (columnWidth + gap));
+    return Math.max(1, Math.min(possibleColumns, 5)); // Between 1-5 columns
+  }, []);
+
+  // Simple round-robin distribution for initial layout
+  const distributePhotosToColumns = useCallback((photoList: PhotoMetadata[]) => {
+    const cols = columnCount;
+    const newColumns: Column[] = Array.from({ length: cols }, () => ({
+      photos: [],
+      height: 0
+    }));
+
+    // Simple round-robin distribution - much more even than height-based
+    photoList.forEach((photo, index) => {
+      const columnIndex = index % cols;
+      newColumns[columnIndex].photos.push(photo);
+    });
+
+    return newColumns;
+  }, [columnCount]);
+
+  // Handle window resize to recalculate columns
+  useEffect(() => {
+    const handleResize = () => {
+      const newColumnCount = calculateColumnCount();
+      if (newColumnCount !== columnCount) {
+        setColumnCount(newColumnCount);
+      }
+    };
+
+    handleResize(); // Initial calculation
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [calculateColumnCount, columnCount]);
+
+  // Update columns when photos or column count changes
+  useEffect(() => {
+    if (photos.length > 0) {
+      const newColumns = distributePhotosToColumns(photos);
+      setColumns(newColumns);
+    }
+  }, [photos, distributePhotosToColumns]);
 
   const loadInitialPhotos = useCallback(async () => {
     try {
@@ -55,11 +114,6 @@ const PhotoGallery: React.FC = () => {
       const newPhotoData = await getPhotos(photosPerPage, skipCount);
 
       if (newPhotoData.length > 0) {
-        console.log(`📸 Adding ${newPhotoData.length} new photos to gallery`);
-        newPhotoData.forEach(photo => {
-          console.log(`🔗 Photo URL: ${photo.url}`);
-        });
-
         setPhotos(prev => [...prev, ...newPhotoData]);
         setHasMore(newPhotoData.length === photosPerPage);
 
@@ -69,7 +123,6 @@ const PhotoGallery: React.FC = () => {
           newStates[photo.blobName] = 'loading';
         });
         setImageLoadStates(prev => ({ ...prev, ...newStates }));
-        console.log(`🔄 Set ${Object.keys(newStates).length} images to loading state`);
       } else {
         setHasMore(false);
       }
@@ -91,7 +144,6 @@ const PhotoGallery: React.FC = () => {
   };
 
   const handleImageLoad = (blobName: string) => {
-    console.log(`✅ Image loaded: ${blobName}`);
     setImageLoadStates(prev => ({
       ...prev,
       [blobName]: 'loaded'
@@ -99,7 +151,6 @@ const PhotoGallery: React.FC = () => {
   };
 
   const handleImageError = (blobName: string) => {
-    console.error(`❌ Failed to load image: ${blobName}`);
     setImageLoadStates(prev => ({
       ...prev,
       [blobName]: 'error'
@@ -147,59 +198,62 @@ const PhotoGallery: React.FC = () => {
     return <div className="empty-state">No photos found in the container.</div>;
   }
 
+  const renderPhoto = (photo: PhotoMetadata, globalIndex: number) => {
+    const photoKey = photo.blobName || `photo-${globalIndex}`;
+    const loadState = imageLoadStates[photoKey] || 'loading';
+
+    return (
+      <div
+        key={photoKey}
+        className={`photo-item ${loadState}`}
+        onClick={() => loadState === 'loaded' ? handlePhotoClick(photo) : undefined}
+      >
+        {loadState === 'loading' && (
+          <div className="photo-placeholder">
+            <div className="photo-spinner"></div>
+            <span>Loading...</span>
+          </div>
+        )}
+
+        {loadState === 'error' && (
+          <div className="photo-error">
+            <span>⚠️</span>
+            <span>Failed to load image</span>
+            <button onClick={() => retryLoadImage(photoKey)}>
+              Retry
+            </button>
+          </div>
+        )}
+
+        <img
+          src={photo.url}
+          alt={`Gallery item ${globalIndex + 1}`}
+          loading="eager"
+          data-blob-name={photo.blobName}
+          onLoad={() => handleImageLoad(photoKey)}
+          onError={() => handleImageError(photoKey)}
+          style={{
+            display: loadState === 'loaded' ? 'block' : 'none',
+            maxWidth: '100%',
+            height: 'auto'
+          }}
+        />
+      </div>
+    );
+  };
+
   return (
-    <div className="photo-gallery">
+    <div className="photo-gallery" ref={galleryRef}>
       <h3 className="gallery-title">Photo Gallery</h3>
-      <div className="photo-grid">
-        {photos.map((photo, index) => {
-          const photoKey = photo.blobName || `photo-${index}`;
-          const loadState = imageLoadStates[photoKey] || 'loading';
-          console.log(`🖼️ Rendering photo ${index + 1}: ${photoKey}, state: ${loadState}`);
-          return (
-            <div
-              key={photoKey}
-              className={`photo-item ${loadState}`}
-              onClick={() => loadState === 'loaded' ? handlePhotoClick(photo) : undefined}
-            >
-              {loadState === 'loading' && (
-                <div className="photo-placeholder">
-                  <div className="photo-spinner"></div>
-                  <span>Loading...</span>
-                </div>
-              )}
-
-              {loadState === 'error' && (
-                <div className="photo-error">
-                  <span>⚠️</span>
-                  <span>Failed to load image</span>
-                  <button onClick={() => retryLoadImage(photoKey)}>
-                    Retry
-                  </button>
-                </div>
-              )}
-
-              <img
-                src={photo.url}
-                alt={`Gallery item ${index + 1}`}
-                loading="eager" // Always eager load to avoid lazy loading issues
-                data-blob-name={photo.blobName}
-                onLoad={() => {
-                  console.log(`🎯 IMG onLoad fired for: ${photoKey}`);
-                  handleImageLoad(photoKey);
-                }}
-                onError={() => {
-                  console.log(`💥 IMG onError fired for: ${photoKey}`);
-                  handleImageError(photoKey);
-                }}
-                style={{
-                  display: loadState === 'loaded' ? 'block' : 'none',
-                  maxWidth: '100%',
-                  height: 'auto'
-                }}
-              />
-            </div>
-          );
-        })}
+      <div className="photo-grid-balanced">
+        {columns.map((column, columnIndex) => (
+          <div key={columnIndex} className="photo-column">
+            {column.photos.map((photo) => {
+              const globalIndex = photos.findIndex(p => p.blobName === photo.blobName);
+              return renderPhoto(photo, globalIndex);
+            })}
+          </div>
+        ))}
       </div>
 
       {hasMore && (
