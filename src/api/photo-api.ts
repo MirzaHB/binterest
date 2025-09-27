@@ -27,7 +27,7 @@ export const uploadPhoto = async (file: File): Promise<UploadResponse> => {
   return response.data;
 };
 
-// Backend interface (what actually comes from your C# API)
+// Backend interface (what actually comes from the C# API)
 interface BackendPhotoMetadata {
   url: string;
   description?: string;

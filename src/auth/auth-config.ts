@@ -2,9 +2,9 @@ import { Configuration } from '@azure/msal-browser';
 
 export const msalConfig: Configuration = {
   auth: {
-    clientId: process.env.REACT_APP_AZURE_CLIENT_ID!, // Your Azure App Registration Client ID
-    authority: 'https://login.microsoftonline.com/common', // or your tenant ID
-    redirectUri: window.location.origin, // Usually http://localhost:3000 in dev
+    clientId: process.env.REACT_APP_MSAL_CLIENT_ID!,
+    authority: `https://login.microsoftonline.com/${process.env.REACT_APP_MSAL_TENANT_ID}`,
+    redirectUri: process.env.REACT_APP_MSAL_REDIRECT_URI || window.location.origin,
   },
   cache: {
     cacheLocation: 'sessionStorage',
@@ -13,9 +13,9 @@ export const msalConfig: Configuration = {
 };
 
 export const loginRequest = {
-  scopes: ['User.Read'], // Adjust based on what your API needs
+  scopes: [`api://${process.env.REACT_APP_MSAL_CLIENT_ID}/access_as_user`],
 };
 
-export const apiRequest = {
-  scopes: [`api://${process.env.REACT_APP_API_CLIENT_ID}/access_as_user`], // Your API scope
+export const logoutRequest = {
+  postLogoutRedirectUri: process.env.REACT_APP_MSAL_REDIRECT_URI || window.location.origin,
 };

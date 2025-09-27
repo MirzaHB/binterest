@@ -7,6 +7,8 @@ import PhotoGallery from './Components/photos/PhotoGallery';
 import Blog from './Components/Blog';
 import BlogUpload from './Components/blog/BlogUpload';
 import BlogPost from './Components/blog/BlogPost';
+import BlogEditor from './Components/blog/BlogEditor';
+import AdminRoute from './Components/auth/AdminRoute';
 
 const App: React.FC = () => {
   return (
@@ -14,11 +16,24 @@ const App: React.FC = () => {
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/photo-upload" element={<PhotoUpload />} />
+          <Route path="/photo-upload" element={
+            <AdminRoute>
+              <PhotoUpload />
+            </AdminRoute>
+          } />
           <Route path="/photos" element={<PhotoGallery />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogPost />} />
-          <Route path="/blog-upload" element={<BlogUpload />} />
+          <Route path="/blog-upload" element={
+            <AdminRoute>
+              <BlogUpload />
+            </AdminRoute>
+          } />
+          <Route path="/blog-editor" element={
+            <AdminRoute>
+              <BlogEditor />
+            </AdminRoute>
+          } />
         </Routes>
       </Layout>
     </Router>

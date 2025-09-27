@@ -128,3 +128,8 @@ export const calculateReadTime = (content: string): string => {
   const minutes = Math.ceil(wordCount / wordsPerMinute);
   return `${minutes} min read`;
 };
+
+// Convenience function for the blog editor
+export const uploadBlog = async (blogData: CreateBlogRequest): Promise<CreateBlogResponse> => {
+  return createBlog(blogData);
+};

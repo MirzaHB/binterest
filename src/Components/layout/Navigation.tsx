@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import AuthDropdown from '../auth/AuthDropdown';
+import { useAuth } from '../../auth/useAuth';
 import './Navigation.css';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
+  const { hasCrudRole } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -42,27 +45,29 @@ const Navigation: React.FC = () => {
             Blog
           </Link>
 
-          <Link
-            to="/photo-upload"
-            className={`nav-link ${isActive('/photo-upload') ? 'active' : ''}`}
-          >
-            <span className="nav-icon">📸</span>
-            Photos
-          </Link>
+          {hasCrudRole() && (
+            <Link
+              to="/photo-upload"
+              className={`nav-link ${isActive('/photo-upload') ? 'active' : ''}`}
+            >
+              <span className="nav-icon">📸</span>
+              Photos
+            </Link>
+          )}
 
-          <Link
-            to="/blog-upload"
-            className={`nav-link ${isActive('/blog-upload') ? 'active' : ''}`}
-          >
-            <span className="nav-icon">✍️</span>
-            Write
-          </Link>
+          {hasCrudRole() && (
+            <Link
+              to="/blog-editor"
+              className={`nav-link ${isActive('/blog-editor') ? 'active' : ''}`}
+            >
+              <span className="nav-icon">✍️</span>
+              Write
+            </Link>
+          )}
         </div>
 
         <div className="nav-actions">
-          <button className="nav-button">
-            <span className="nav-icon">👤</span>
-          </button>
+          <AuthDropdown />
         </div>
       </div>
     </nav>
