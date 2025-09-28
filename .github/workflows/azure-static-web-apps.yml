@@ -4,12 +4,10 @@ on:
   push:
     branches:
       - main
-      - master
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
-      - master
 
 jobs:
   build_and_deploy_job:
@@ -17,38 +15,29 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
+      # Step 1: Checkout repository
       - uses: actions/checkout@v3
         with:
           submodules: true
+          lfs: false
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build application
-        run: npm run build
-        env:
-          # Add production environment variables here
-          CI: false
-          REACT_APP_MSAL_CLIENT_ID: ${{ secrets.REACT_APP_MSAL_CLIENT_ID }}
-          REACT_APP_MSAL_TENANT_ID: ${{ secrets.REACT_APP_MSAL_TENANT_ID }}
-          REACT_APP_MSAL_REDIRECT_URI: ${{ secrets.REACT_APP_MSAL_REDIRECT_URI }}
-
+      # Step 2: Build and deploy to Azure Static Web Apps
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
+        env:
+          # Disable treating warnings as errors
+          CI: false
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WITTY_WAVE_085DA431E }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (i.e., PR comments)
           action: "upload"
-          app_location: "/" # App source code path
-          api_location: "" # Api source code path - optional
+
+          ###### Repository/Build Configurations ######
+          app_location: "/"        # App source code path
+          api_location: ""         # API source code path - optional
           output_location: "build" # Built app content directory
+          ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -59,5 +48,5 @@ jobs:
         id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WITTY_WAVE_085DA431E }}
           action: "close"
