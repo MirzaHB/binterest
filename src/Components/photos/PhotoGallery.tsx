@@ -7,6 +7,10 @@ interface ImageLoadState {
   [key: string]: 'loading' | 'loaded' | 'error';
 }
 
+interface ImageHeights {
+  [key: string]: number;
+}
+
 interface Column {
   photos: PhotoMetadata[];
   height: number;
@@ -20,6 +24,7 @@ const PhotoGallery: React.FC = () => {
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoMetadata | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoadStates, setImageLoadStates] = useState<ImageLoadState>({});
+  const [imageHeights, setImageHeights] = useState<ImageHeights>({});
   const [error, setError] = useState<string | null>(null);
   const [columns, setColumns] = useState<Column[]>([]);
   const [columnCount, setColumnCount] = useState(3);
@@ -38,7 +43,7 @@ const PhotoGallery: React.FC = () => {
     return Math.max(1, Math.min(possibleColumns, 5)); // Between 1-5 columns
   }, []);
 
-  // Simple round-robin distribution for initial layout
+  // Height-based distribution for better masonry layout
   const distributePhotosToColumns = useCallback((photoList: PhotoMetadata[]) => {
     const cols = columnCount;
     const newColumns: Column[] = Array.from({ length: cols }, () => ({
@@ -46,14 +51,41 @@ const PhotoGallery: React.FC = () => {
       height: 0
     }));
 
-    // Simple round-robin distribution - much more even than height-based
-    photoList.forEach((photo, index) => {
-      const columnIndex = index % cols;
-      newColumns[columnIndex].photos.push(photo);
+    // Distribute photos to the shortest column each time
+    photoList.forEach((photo) => {
+      // Find the column with the minimum height
+      let shortestColumnIndex = 0;
+      let minHeight = newColumns[0].height;
+
+      for (let i = 1; i < cols; i++) {
+        if (newColumns[i].height < minHeight) {
+          minHeight = newColumns[i].height;
+          shortestColumnIndex = i;
+        }
+      }
+
+      // Add photo to the shortest column
+      newColumns[shortestColumnIndex].photos.push(photo);
+
+      // Use actual height if available, otherwise estimate
+      let photoHeight: number;
+      if (imageHeights[photo.blobName]) {
+        photoHeight = imageHeights[photo.blobName];
+      } else {
+        // Estimate photo height based on blobName hash for consistency
+        const hashCode = photo.blobName.split('').reduce((a, b) => {
+          a = ((a << 5) - a) + b.charCodeAt(0);
+          return a & a;
+        }, 0);
+        // Convert hash to height between 200-500px
+        photoHeight = Math.abs(hashCode % 300) + 200;
+      }
+
+      newColumns[shortestColumnIndex].height += photoHeight + 20; // +20 for gap
     });
 
     return newColumns;
-  }, [columnCount]);
+  }, [columnCount, imageHeights]);
 
   // Handle window resize to recalculate columns
   useEffect(() => {
@@ -76,6 +108,24 @@ const PhotoGallery: React.FC = () => {
       setColumns(newColumns);
     }
   }, [photos, distributePhotosToColumns]);
+
+  // Throttled redistribution when we get more actual image heights
+  // Temporarily disabled to fix loading issues
+  /*
+  useEffect(() => {
+    if (photos.length > 0 && Object.keys(imageHeights).length > 0) {
+      // Only redistribute if we have heights for a significant portion of loaded photos
+      const loadedImagesCount = Object.keys(imageHeights).length;
+      const totalPhotos = photos.length;
+
+      // Only redistribute when we have heights for at least 25% of photos, or every 5 images
+      if (loadedImagesCount % 5 === 0 || loadedImagesCount / totalPhotos >= 0.25) {
+        const newColumns = distributePhotosToColumns(photos);
+        setColumns(newColumns);
+      }
+    }
+  }, [imageHeights, photos, distributePhotosToColumns]);
+  */
 
   const loadInitialPhotos = useCallback(async () => {
     try {
@@ -143,11 +193,23 @@ const PhotoGallery: React.FC = () => {
     setSelectedPhoto(null);
   };
 
-  const handleImageLoad = (blobName: string) => {
-    setImageLoadStates(prev => ({
+  const handleImageLoad = (blobName: string, element: HTMLImageElement) => {
+    // Store actual image height for better distribution
+    setImageHeights(prev => ({
       ...prev,
-      [blobName]: 'loaded'
+      [blobName]: element.offsetHeight
     }));
+
+    setImageLoadStates(prev => {
+      // Only update if the state is currently loading to avoid unnecessary re-renders
+      if (prev[blobName] !== 'loaded') {
+        return {
+          ...prev,
+          [blobName]: 'loaded'
+        };
+      }
+      return prev;
+    });
   };
 
   const handleImageError = (blobName: string) => {
@@ -230,7 +292,7 @@ const PhotoGallery: React.FC = () => {
           alt={`Gallery item ${globalIndex + 1}`}
           loading="eager"
           data-blob-name={photo.blobName}
-          onLoad={() => handleImageLoad(photoKey)}
+          onLoad={(e) => handleImageLoad(photoKey, e.currentTarget)}
           onError={() => handleImageError(photoKey)}
           style={{
             display: loadState === 'loaded' ? 'block' : 'none',
@@ -248,9 +310,11 @@ const PhotoGallery: React.FC = () => {
       <div className="photo-grid-balanced">
         {columns.map((column, columnIndex) => (
           <div key={columnIndex} className="photo-column">
-            {column.photos.map((photo) => {
+            {column.photos.map((photo, photoIndex) => {
               const globalIndex = photos.findIndex(p => p.blobName === photo.blobName);
-              return renderPhoto(photo, globalIndex);
+              // Use a fallback index if not found to prevent issues
+              const safeIndex = globalIndex >= 0 ? globalIndex : photoIndex;
+              return renderPhoto(photo, safeIndex);
             })}
           </div>
         ))}

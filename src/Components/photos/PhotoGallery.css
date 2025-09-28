@@ -168,6 +168,9 @@
   height: 200px;
   color: #666;
   font-size: 0.9rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .photo-spinner {
@@ -196,6 +199,9 @@
   font-size: 0.9rem;
   text-align: center;
   padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .photo-error span:first-child {
