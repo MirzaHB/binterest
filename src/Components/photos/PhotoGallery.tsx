@@ -3,14 +3,6 @@ import { getPhotos, PhotoMetadata } from '../../api/photo-api';
 import PhotoModal from './PhotoModal';
 import './PhotoGallery.css';
 
-interface ImageLoadState {
-  [key: string]: 'loading' | 'loaded' | 'error';
-}
-
-interface ImageHeights {
-  [key: string]: number;
-}
-
 interface Column {
   photos: PhotoMetadata[];
   height: number;
@@ -19,101 +11,53 @@ interface Column {
 const PhotoGallery: React.FC = () => {
   const [photos, setPhotos] = useState<PhotoMetadata[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoMetadata | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [imageLoadStates, setImageLoadStates] = useState<ImageLoadState>({});
-  const [imageHeights, setImageHeights] = useState<ImageHeights>({});
   const [error, setError] = useState<string | null>(null);
   const [columns, setColumns] = useState<Column[]>([]);
   const [columnCount, setColumnCount] = useState(3);
+  const [imageHeights, setImageHeights] = useState<{[key: string]: number}>({});
   const galleryRef = useRef<HTMLDivElement>(null);
-  const photosPerPage = 5;
 
   // Calculate optimal column count based on screen width
   const calculateColumnCount = useCallback(() => {
     if (!galleryRef.current) return 3;
-
     const containerWidth = galleryRef.current.offsetWidth;
-    const columnWidth = 350; // Base column width
-    const gap = 20; // Gap between columns
-
+    const columnWidth = 350;
+    const gap = 20;
     const possibleColumns = Math.floor((containerWidth + gap) / (columnWidth + gap));
-    return Math.max(1, Math.min(possibleColumns, 5)); // Between 1-5 columns
+    return Math.max(1, Math.min(possibleColumns, 5));
   }, []);
 
-  // Core balancing algorithm: always place photo in shortest column
-  const distributePhotosToColumns = useCallback(
-    (photoList: PhotoMetadata[]) => {
-      const cols = columnCount;
-      const newColumns: Column[] = Array.from({ length: cols }, () => ({
-        photos: [],
-        height: 0
-      }));
+  // Simple, reliable masonry distribution - always shortest column
+  const distributePhotosToColumns = useCallback((photoList: PhotoMetadata[]) => {
+    const cols = columnCount;
+    const newColumns: Column[] = Array.from({ length: cols }, () => ({
+      photos: [],
+      height: 0
+    }));
 
-      photoList.forEach((photo) => {
-        // Find the column with the minimum height
-        let shortestColumnIndex = 0;
-        let minHeight = newColumns[0].height;
-
-        for (let i = 1; i < cols; i++) {
-          if (newColumns[i].height < minHeight) {
-            minHeight = newColumns[i].height;
-            shortestColumnIndex = i;
-          }
+    photoList.forEach((photo) => {
+      // Find the shortest column
+      let shortestColumnIndex = 0;
+      for (let i = 1; i < cols; i++) {
+        if (newColumns[i].height < newColumns[shortestColumnIndex].height) {
+          shortestColumnIndex = i;
         }
+      }
 
-        // Add photo to the shortest column
-        newColumns[shortestColumnIndex].photos.push(photo);
+      // Add photo to shortest column
+      newColumns[shortestColumnIndex].photos.push(photo);
 
-        // Use actual height if available, otherwise estimate
-        let photoHeight: number;
-        if (imageHeights[photo.blobName]) {
-          photoHeight = imageHeights[photo.blobName];
-        } else {
-          // Estimate height based on a hash of blobName
-          const hashCode = photo.blobName.split('').reduce((a, b) => {
-            a = ((a << 5) - a) + b.charCodeAt(0);
-            return a & a;
-          }, 0);
-          // Convert hash to a height between 200-500px
-          photoHeight = Math.abs(hashCode % 300) + 200;
-        }
+      // Use actual height or reasonable estimate
+      const photoHeight = imageHeights[photo.blobName] || 350;
+      newColumns[shortestColumnIndex].height += photoHeight + 20; // 20px gap
+    });
 
-        newColumns[shortestColumnIndex].height += photoHeight + 20; // +20 for gap
-      });
+    return newColumns;
+  }, [columnCount, imageHeights]);
 
-      return newColumns;
-    },
-    [columnCount, imageHeights]
-  );
-
-  // Incrementally append new photos into the current shortest column
-  const appendPhotos = useCallback(
-    (newPhotos: PhotoMetadata[]) => {
-      const updatedColumns = [...columns];
-
-      newPhotos.forEach(photo => {
-        // Find the shortest column at this moment
-        let shortestColumnIndex = 0;
-        for (let i = 1; i < updatedColumns.length; i++) {
-          if (updatedColumns[i].height < updatedColumns[shortestColumnIndex].height) {
-            shortestColumnIndex = i;
-          }
-        }
-
-        const photoHeight = imageHeights[photo.blobName] || 300; // fallback until image loads
-        updatedColumns[shortestColumnIndex].photos.push(photo);
-        updatedColumns[shortestColumnIndex].height += photoHeight + 20;
-      });
-
-      setColumns(updatedColumns);
-    },
-    [columns, imageHeights]
-  );
-
-  // Handle window resize to recalculate column count
+  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       const newColumnCount = calculateColumnCount();
@@ -122,12 +66,12 @@ const PhotoGallery: React.FC = () => {
       }
     };
 
-    handleResize(); // Initial calculation
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [calculateColumnCount, columnCount]);
 
-  // When photos or column count changes, fully redistribute
+  // Redistribute when photos or column count changes
   useEffect(() => {
     if (photos.length > 0) {
       const newColumns = distributePhotosToColumns(photos);
@@ -135,77 +79,50 @@ const PhotoGallery: React.FC = () => {
     }
   }, [photos, distributePhotosToColumns]);
 
-  // Rebalance layout when actual heights are known
-  useEffect(() => {
-    if (photos.length > 0 && Object.keys(imageHeights).length > 0) {
-      const loadedImagesCount = Object.keys(imageHeights).length;
-      const totalPhotos = photos.length;
-
-      // Redistribute when a batch of real heights is loaded
-      if (loadedImagesCount % 5 === 0 || loadedImagesCount / totalPhotos >= 0.25) {
-        const newColumns = distributePhotosToColumns(photos);
-        setColumns(newColumns);
-      }
-    }
-  }, [imageHeights, photos, distributePhotosToColumns]);
-
-  // Initial photo load
-  const loadInitialPhotos = useCallback(async () => {
+  // Load all photos
+  const loadAllPhotos = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const photoData = await getPhotos(photosPerPage, 0);
-
+      const photoData = await getPhotos(10000, 0);
       setPhotos(photoData);
-      setHasMore(photoData.length === photosPerPage);
-
-      // Initialize image load states
-      const initialStates: ImageLoadState = {};
-      photoData.forEach((photo, index) => {
-        const key = photo.blobName || `photo-${index}`;
-        initialStates[key] = 'loading';
-      });
-      setImageLoadStates(initialStates);
     } catch (error) {
       console.error('Failed to load photos:', error);
       setError(error instanceof Error ? error.message : 'Failed to load photos');
     } finally {
       setLoading(false);
     }
-  }, [photosPerPage]);
+  }, []);
 
-  // Load more photos incrementally
-  const loadMorePhotos = async () => {
-    if (loadingMore || !hasMore) return;
+  // Handle image load - store actual height and redistribute
+  const handleImageLoad = useCallback((blobName: string, element: HTMLImageElement) => {
+    const actualHeight = element.offsetHeight;
 
-    try {
-      setLoadingMore(true);
-      const skipCount = photos.length;
-      const newPhotoData = await getPhotos(photosPerPage, skipCount);
-
-      if (newPhotoData.length > 0) {
-        setPhotos(prev => [...prev, ...newPhotoData]);
-        setHasMore(newPhotoData.length === photosPerPage);
-
-        // Initialize image load states
-        const newStates: ImageLoadState = {};
-        newPhotoData.forEach(photo => {
-          newStates[photo.blobName] = 'loading';
-        });
-        setImageLoadStates(prev => ({ ...prev, ...newStates }));
-
-        // Incrementally add new photos to shortest columns
-        appendPhotos(newPhotoData);
-      } else {
-        setHasMore(false);
+    setImageHeights(prev => {
+      if (!prev[blobName]) {
+        return {
+          ...prev,
+          [blobName]: actualHeight
+        };
       }
-    } catch (error) {
-      console.error('Failed to load more photos:', error);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
+      return prev;
+    });
+  }, []);
 
+  // Redistribute when we have enough real heights
+  useEffect(() => {
+    if (photos.length > 0 && Object.keys(imageHeights).length > 0) {
+      const loadedCount = Object.keys(imageHeights).length;
+
+      // Redistribute at key milestones
+      if (loadedCount % 10 === 0 || loadedCount === photos.length) {
+        const newColumns = distributePhotosToColumns(photos);
+        setColumns(newColumns);
+      }
+    }
+  }, [imageHeights, photos, distributePhotosToColumns]);
+
+  // Photo click handler
   const handlePhotoClick = (photo: PhotoMetadata) => {
     setSelectedPhoto(photo);
     setIsModalOpen(true);
@@ -216,49 +133,10 @@ const PhotoGallery: React.FC = () => {
     setSelectedPhoto(null);
   };
 
-  const handleImageLoad = (blobName: string, element: HTMLImageElement) => {
-    setImageHeights(prev => ({
-      ...prev,
-      [blobName]: element.offsetHeight
-    }));
-
-    setImageLoadStates(prev => {
-      if (prev[blobName] !== 'loaded') {
-        return {
-          ...prev,
-          [blobName]: 'loaded'
-        };
-      }
-      return prev;
-    });
-  };
-
-  const handleImageError = (blobName: string) => {
-    setImageLoadStates(prev => ({
-      ...prev,
-      [blobName]: 'error'
-    }));
-  };
-
-  const retryLoadImage = (blobName: string) => {
-    setImageLoadStates(prev => ({
-      ...prev,
-      [blobName]: 'loading'
-    }));
-
-    const img = document.querySelector(`img[data-blob-name="${blobName}"]`) as HTMLImageElement;
-    if (img) {
-      const originalSrc = img.src;
-      img.src = '';
-      setTimeout(() => {
-        img.src = originalSrc;
-      }, 100);
-    }
-  };
-
+  // Load photos on mount
   useEffect(() => {
-    loadInitialPhotos();
-  }, [loadInitialPhotos]);
+    loadAllPhotos();
+  }, [loadAllPhotos]);
 
   if (loading) {
     return <div className="loading">Loading photos…</div>;
@@ -268,7 +146,7 @@ const PhotoGallery: React.FC = () => {
     return (
       <div className="empty-state">
         <p>Error loading photos: {error}</p>
-        <button onClick={loadInitialPhotos} style={{ marginTop: '10px', padding: '8px 16px' }}>
+        <button onClick={loadAllPhotos} style={{ marginTop: '10px', padding: '8px 16px' }}>
           Retry
         </button>
       </div>
@@ -279,80 +157,41 @@ const PhotoGallery: React.FC = () => {
     return <div className="empty-state">No photos found in the container.</div>;
   }
 
-  const renderPhoto = (photo: PhotoMetadata, globalIndex: number) => {
-    const photoKey = photo.blobName || `photo-${globalIndex}`;
-    const loadState = imageLoadStates[photoKey] || 'loading';
-
-    return (
-      <div
-        key={photoKey}
-        className={`photo-item ${loadState}`}
-        onClick={() => loadState === 'loaded' ? handlePhotoClick(photo) : undefined}
-      >
-        {loadState === 'loading' && (
-          <div className="photo-placeholder">
-            <div className="photo-spinner"></div>
-            <span>Loading...</span>
-          </div>
-        )}
-
-        {loadState === 'error' && (
-          <div className="photo-error">
-            <span>⚠️</span>
-            <span>Failed to load image</span>
-            <button onClick={() => retryLoadImage(photoKey)}>
-              Retry
-            </button>
-          </div>
-        )}
-
-        <img
-          src={photo.url}
-          alt={`Gallery item ${globalIndex + 1}`}
-          loading="eager"
-          data-blob-name={photo.blobName}
-          onLoad={(e) => handleImageLoad(photoKey, e.currentTarget)}
-          onError={() => handleImageError(photoKey)}
-          style={{
-            display: loadState === 'loaded' ? 'block' : 'none',
-            maxWidth: '100%',
-            height: 'auto'
-          }}
-        />
-      </div>
-    );
-  };
-
   return (
     <div className="photo-gallery" ref={galleryRef}>
       <h3 className="gallery-title">Photo Gallery</h3>
+
       <div className="photo-grid-balanced">
         {columns.map((column, columnIndex) => (
           <div key={columnIndex} className="photo-column">
-            {column.photos.map((photo, photoIndex) => {
-              const globalIndex = photos.findIndex(p => p.blobName === photo.blobName);
-              const safeIndex = globalIndex >= 0 ? globalIndex : photoIndex;
-              return renderPhoto(photo, safeIndex);
-            })}
+            {column.photos.map((photo, photoIndex) => (
+              <div
+                key={photo.blobName || `photo-${photoIndex}`}
+                className="photo-item"
+                onClick={() => handlePhotoClick(photo)}
+              >
+                <img
+                  src={photo.url}
+                  alt={`Gallery item ${photoIndex + 1}`}
+                  loading="lazy"
+                  onLoad={(e) => handleImageLoad(photo.blobName, e.currentTarget)}
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block',
+                    borderRadius: '8px',
+                    cursor: 'pointer'
+                  }}
+                />
+              </div>
+            ))}
           </div>
         ))}
       </div>
 
-      {hasMore && (
-        <div className="load-more-container">
-          <button
-            className={`load-more-btn ${loadingMore ? 'loading' : ''}`}
-            onClick={loadMorePhotos}
-            disabled={loadingMore}
-          >
-            {loadingMore ? 'Loading more photos...' : 'Load More Photos'}
-          </button>
-        </div>
-      )}
-
-      {!hasMore && photos.length > 0 && (
+      {photos.length > 0 && (
         <div className="end-message">
-          You've reached the end! Total photos: {photos.length}
+          Total photos: {photos.length}
         </div>
       )}
 
