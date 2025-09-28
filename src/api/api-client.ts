@@ -2,8 +2,9 @@ import axios, { AxiosInstance } from 'axios';
 import { PublicClientApplication } from '@azure/msal-browser';
 import { msalConfig } from '../auth/auth-config';
 
+// Always use /api - proxy handles routing in both dev and production
 const apiClient: AxiosInstance = axios.create({
-  baseURL: '/api', // Proxy will redirect to your backend
+  baseURL: '/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
