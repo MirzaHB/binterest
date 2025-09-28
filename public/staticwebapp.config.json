@@ -2,8 +2,7 @@
   "routes": [
     {
       "route": "/api/*",
-      "rewrite": "https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api/{*restOfPath}",
-      "allowedRoles": ["anonymous"]
+      "rewrite": "https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api/"
     },
     {
       "route": "/*",
