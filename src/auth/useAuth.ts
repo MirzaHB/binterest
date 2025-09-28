@@ -45,7 +45,7 @@ export const useAuth = () => {
         return null;
       }
 
-      const response = await fetch('/api/user/info', {
+      const response = await fetch('https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api/user/info', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
