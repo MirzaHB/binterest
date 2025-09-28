@@ -34,6 +34,7 @@ jobs:
         run: npm run build
         env:
           # Add production environment variables here
+          CI: false
           REACT_APP_MSAL_CLIENT_ID: ${{ secrets.REACT_APP_MSAL_CLIENT_ID }}
           REACT_APP_MSAL_TENANT_ID: ${{ secrets.REACT_APP_MSAL_TENANT_ID }}
           REACT_APP_MSAL_REDIRECT_URI: ${{ secrets.REACT_APP_MSAL_REDIRECT_URI }}
