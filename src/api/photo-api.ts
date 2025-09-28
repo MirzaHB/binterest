@@ -1,4 +1,4 @@
-import apiClient from './api-client';
+import apiClient, { createAuthenticatedRequest } from './api-client';
 
 export interface UploadResponse {
   message: string;
@@ -14,11 +14,12 @@ export interface PhotoMetadata {
   lastModified?: string;
 }
 
-export const uploadPhoto = async (file: File): Promise<UploadResponse> => {
+export const uploadPhoto = async (file: File, accessToken: string): Promise<UploadResponse> => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await apiClient.post<UploadResponse>('/photos/upload', formData, {
+  const authenticatedClient = createAuthenticatedRequest(accessToken);
+  const response = await authenticatedClient.post<UploadResponse>('/photos/upload', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

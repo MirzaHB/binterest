@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { uploadPhoto } from '../../api/photo-api';
+import { useAuth } from '../../auth/useAuth';
 import './PhotoUpload.css';
 
 const PhotoUpload: React.FC = () => {
+  const { getAccessToken } = useAuth();
   const [statusMessage, setStatusMessage] = useState('');
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -62,7 +64,13 @@ const PhotoUpload: React.FC = () => {
     setError('');
 
     try {
-      const response = await uploadPhoto(selectedFile);
+      // Get access token first
+      const accessToken = await getAccessToken();
+      if (!accessToken) {
+        throw new Error('Unable to get access token. Please try logging in again.');
+      }
+
+      const response = await uploadPhoto(selectedFile, accessToken);
       setStatusMessage(`✅ ${response.message}`);
       setSelectedFile(null);
       setPreviewUrl('');

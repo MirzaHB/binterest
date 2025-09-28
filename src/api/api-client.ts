@@ -1,8 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
-import { PublicClientApplication } from '@azure/msal-browser';
-import { msalConfig } from '../auth/auth-config';
 
-// Always use /api - proxy handles routing in both dev and production
+// Create API client without auth interceptor - auth will be handled manually
 const apiClient: AxiosInstance = axios.create({
   baseURL: 'https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api',
   timeout: 30000,
@@ -11,27 +9,17 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-const msalInstance = new PublicClientApplication(msalConfig);
-
-// Add request interceptor to include auth token
-apiClient.interceptors.request.use(async (config) => {
-  try {
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
-      const response = await msalInstance.acquireTokenSilent({
-        scopes: [`api://${process.env.REACT_APP_MSAL_CLIENT_ID}/access_as_user`],
-        account: accounts[0],
-      });
-
-      if (response.accessToken) {
-        config.headers.Authorization = `Bearer ${response.accessToken}`;
-      }
-    }
-  } catch (error) {
-    console.warn('Failed to acquire access token:', error);
-  }
-  return config;
-});
+// Create a function to create authenticated requests
+export const createAuthenticatedRequest = (token: string) => {
+  return axios.create({
+    baseURL: 'https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api',
+    timeout: 30000,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+};
 
 // Add response interceptor to handle errors
 apiClient.interceptors.response.use(
