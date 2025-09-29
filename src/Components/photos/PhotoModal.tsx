@@ -51,36 +51,13 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose }) => {
             <img src={photo?.url || ''} alt="Full size photo" className="photo-modal-image" />
           </div>
 
-          <div className="photo-modal-sidebar">
-            <h3>Photo Details</h3>
-
-            {photo ? (
-              <div className="photo-modal-metadata">
-                {photo.description && (
-                  <div className="photo-modal-description">
-                    <h4>Description</h4>
-                    <p>{photo.description}</p>
-                  </div>
-                )}
-
-                <div className="photo-modal-field">
-                  <span className="field-label">Filename:</span>
-                  <span className="field-value">{photo.blobName}</span>
-                </div>
-
-                {photo.lastModified && (
-                  <div className="photo-modal-field">
-                    <span className="field-label">Upload Date:</span>
-                    <span className="field-value">{new Date(photo.lastModified).toLocaleDateString()}</span>
-                  </div>
-                )}
+          {photo?.description && (
+            <div className="photo-modal-sidebar">
+              <div className="photo-modal-description">
+                <p>{photo.description}</p>
               </div>
-            ) : (
-              <div className="photo-modal-no-metadata">
-                No metadata available for this photo.
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

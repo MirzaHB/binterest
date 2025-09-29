@@ -46,6 +46,11 @@
   color: #1a202c;
   margin: 0;
   letter-spacing: -0.02em;
+  min-height: 1.2em; /* Prevent layout shift */
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .brand-highlight {
@@ -232,16 +237,16 @@
 }
 
 .about-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 4rem;
-  align-items: start;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
 .about-text {
   font-size: 1.1rem;
   line-height: 1.8;
   color: #4a5568;
+  max-width: none;
 }
 
 .about-intro {
@@ -286,43 +291,6 @@
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
-.about-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
-  transition: all 0.3s ease;
-}
-
-.stat-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
-}
-
-.stat-number {
-  font-size: 2.5rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 0.5rem;
-}
-
-.stat-label {
-  color: #4a5568;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
 
 /* Connect Section */
 .connect-section {
@@ -405,9 +373,6 @@
     font-size: 3.2rem;
   }
 
-  .about-content {
-    gap: 3rem;
-  }
 
   .about-section {
     padding: 5rem 0;
@@ -433,6 +398,8 @@
 
   .hero-title {
     font-size: 2.8rem;
+    min-height: 1.3em;
+    gap: 0.3rem;
   }
 
   .hero-subtitle {
@@ -468,27 +435,13 @@
   }
 
   .about-content {
-    grid-template-columns: 1fr;
-    gap: 3rem;
+    padding: 0 1.5rem;
   }
 
   .section-header h2 {
     font-size: 2.2rem;
   }
 
-  .about-stats {
-    grid-template-columns: repeat(3, 1fr);
-    flex-direction: row;
-    gap: 1rem;
-  }
-
-  .stat-item {
-    padding: 1.5rem;
-  }
-
-  .stat-number {
-    font-size: 2rem;
-  }
 
   .connect-section h3 {
     font-size: 2rem;
@@ -520,6 +473,9 @@
 
   .hero-title {
     font-size: 2.2rem;
+    min-height: 1.4em;
+    gap: 0.25rem;
+    justify-content: center;
   }
 
   .hero-subtitle {
@@ -560,9 +516,8 @@
     font-size: 1.1rem;
   }
 
-  .about-stats {
-    flex-direction: column;
-    gap: 1.5rem;
+  .about-content {
+    padding: 0 1rem;
   }
 
   .current-focus {

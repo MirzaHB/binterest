@@ -1,0 +1,42 @@
+.typewriter-cursor {
+  opacity: 1;
+  animation: blink 1s infinite;
+  color: inherit;
+  font-weight: inherit;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.typewriter-text {
+  display: inline-block;
+  min-height: 1.2em; /* Prevents layout shift */
+  min-width: 280px; /* Prevents horizontal shifting on desktop */
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .typewriter-text {
+    min-width: 220px;
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .typewriter-text {
+    min-width: 180px;
+    font-size: inherit;
+  }
+}
+
+@media (max-width: 360px) {
+  .typewriter-text {
+    min-width: 160px;
+  }
+}

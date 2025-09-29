@@ -181,17 +181,28 @@
 
 @media (max-width: 640px) {
   .nav-container {
-    padding: 1rem;
+    padding: 1rem 0.75rem;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+  }
+
+  .nav-container::-webkit-scrollbar { /* WebKit */
+    display: none;
   }
 
   .nav-menu {
     gap: 0.1rem;
+    flex-shrink: 0;
+    min-width: max-content;
   }
 
   .nav-link {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    min-width: 40px;
+    justify-content: center;
   }
 
   .nav-link span:not(.nav-icon) {
@@ -199,8 +210,13 @@
   }
 
   .nav-button {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  .nav-actions {
+    flex-shrink: 0;
   }
 }
 
@@ -211,5 +227,42 @@
 
   .nav-container {
     height: 60px;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .nav-menu {
+    gap: 0.05rem;
+  }
+
+  .nav-link {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
+    min-width: 36px;
+  }
+
+  .nav-button {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+  .nav-container {
+    padding: 0.75rem 0.25rem;
+  }
+
+  .nav-link {
+    padding: 0.3rem 0.4rem;
+    min-width: 32px;
+  }
+
+  .nav-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .brand-icon {
+    font-size: 1.4rem;
   }
 }

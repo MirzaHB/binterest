@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import TypewriterEffect from './TypewriterEffect';
 import './Home.css';
+import './TypewriterEffect.css';
 
 const Home: React.FC = () => {
   return (
@@ -10,7 +12,20 @@ const Home: React.FC = () => {
           <div className="greeting-animation">
             <span className="wave">👋</span>
             <h1 className="hero-title">
-              Hi, I'm <span className="brand-highlight">Hassan Baig</span>
+              Hello, I am{' '}
+              <span className="brand-highlight">
+                <TypewriterEffect
+                  texts={[
+                    'Hassan Baig',
+                    'A software engineer',
+                    'A coffee-addicted, animal loving software nerd'
+                  ]}
+                  speed={80}
+                  deleteSpeed={40}
+                  delay={2500}
+                  className="typewriter-text"
+                />
+              </span>
             </h1>
           </div>
 
@@ -73,21 +88,6 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
-
-          <div className="about-stats">
-            <div className="stat-item">
-              <div className="stat-number">5+</div>
-              <div className="stat-label">Years Coding</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">50+</div>
-              <div className="stat-label">Projects Built</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">∞</div>
-              <div className="stat-label">Ideas Brewing</div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -95,17 +95,12 @@ const Home: React.FC = () => {
         <h3>Let's Connect</h3>
         <p>I'm always open to interesting conversations and new opportunities</p>
         <div className="social-grid">
-          <a href="https://linkedin.com/in/hassan-baig" className="social-card" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.linkedin.com/in/mirza-hassan-baig-a33780229/" className="social-card" target="_blank" rel="noopener noreferrer">
             <span className="social-icon">💼</span>
             <span className="social-name">LinkedIn</span>
             <span className="social-desc">Professional network</span>
           </a>
-          <a href="mailto:hassan@example.com" className="social-card">
-            <span className="social-icon">📧</span>
-            <span className="social-name">Email</span>
-            <span className="social-desc">Direct contact</span>
-          </a>
-          <a href="https://github.com/hassan-baig" className="social-card" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/MirzaHB" className="social-card" target="_blank" rel="noopener noreferrer">
             <span className="social-icon">🐙</span>
             <span className="social-name">GitHub</span>
             <span className="social-desc">Code & projects</span>

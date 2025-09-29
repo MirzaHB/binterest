@@ -23,10 +23,27 @@ const PhotoGallery: React.FC = () => {
   const calculateColumnCount = useCallback(() => {
     if (!galleryRef.current) return 3;
     const containerWidth = galleryRef.current.offsetWidth;
-    const columnWidth = 350;
-    const gap = 20;
-    const possibleColumns = Math.floor((containerWidth + gap) / (columnWidth + gap));
-    return Math.max(1, Math.min(possibleColumns, 5));
+
+    // Mobile-first responsive column calculation
+    if (containerWidth <= 600) {
+      // Mobile phones: Always 2 columns
+      return 2;
+    } else if (containerWidth <= 768) {
+      // Small tablets: 2-3 columns
+      return containerWidth > 680 ? 3 : 2;
+    } else if (containerWidth <= 1024) {
+      // Medium screens: 3-4 columns
+      const columnWidth = 250;
+      const gap = 18;
+      const possibleColumns = Math.floor((containerWidth + gap) / (columnWidth + gap));
+      return Math.max(3, Math.min(possibleColumns, 4));
+    } else {
+      // Large screens: 3-5 columns
+      const columnWidth = 350;
+      const gap = 20;
+      const possibleColumns = Math.floor((containerWidth + gap) / (columnWidth + gap));
+      return Math.max(3, Math.min(possibleColumns, 5));
+    }
   }, []);
 
   // Simple, reliable masonry distribution - always shortest column
@@ -189,11 +206,6 @@ const PhotoGallery: React.FC = () => {
         ))}
       </div>
 
-      {photos.length > 0 && (
-        <div className="end-message">
-          Total photos: {photos.length}
-        </div>
-      )}
 
       <PhotoModal
         photo={selectedPhoto}

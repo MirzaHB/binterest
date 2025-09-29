@@ -2,12 +2,15 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .main-content {
   flex: 1;
   width: 100%;
   position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 /* Add some breathing room around content */
@@ -29,4 +32,25 @@
 /* Smooth transitions for route changes */
 .main-content {
   transition: all 0.3s ease;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .main-content > * {
+    animation: fadeInUp 0.4s ease-out;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-layout {
+    min-height: 100vh;
+  }
+
+  .main-content {
+    padding: 0;
+  }
+
+  .main-content > * {
+    animation: fadeInUp 0.3s ease-out;
+  }
 }
