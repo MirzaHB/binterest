@@ -1,6 +1,5 @@
 {
   "name": "binterest",
-  "proxy": "http://localhost:5078",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

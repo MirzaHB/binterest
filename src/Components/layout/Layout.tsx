@@ -1,5 +1,6 @@
 import React from 'react';
 import Navigation from './Navigation';
+import MusicPlayer from '../MusicPlayer';
 import './Layout.css';
 
 interface LayoutProps {
@@ -13,6 +14,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <main className="main-content">
         {children}
       </main>
+      <MusicPlayer />
     </div>
   );
 };
