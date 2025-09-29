@@ -15,7 +15,19 @@ const PhotoGallery: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [columns, setColumns] = useState<Column[]>([]);
-  const [columnCount, setColumnCount] = useState(3);
+  // Calculate initial column count based on screen size
+  const getInitialColumnCount = () => {
+    if (typeof window !== 'undefined') {
+      const width = window.innerWidth;
+      if (width <= 600) return 2;
+      if (width <= 768) return width > 680 ? 3 : 2;
+      if (width <= 1024) return 3;
+      return 3;
+    }
+    return 3;
+  };
+
+  const [columnCount, setColumnCount] = useState(getInitialColumnCount);
   const [imageHeights, setImageHeights] = useState<{[key: string]: number}>({});
   const galleryRef = useRef<HTMLDivElement>(null);
 
@@ -74,18 +86,28 @@ const PhotoGallery: React.FC = () => {
     return newColumns;
   }, [columnCount, imageHeights]);
 
-  // Handle window resize
+  // Handle window resize with debouncing
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
     const handleResize = () => {
-      const newColumnCount = calculateColumnCount();
-      if (newColumnCount !== columnCount) {
-        setColumnCount(newColumnCount);
-      }
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (galleryRef.current) {
+          const newColumnCount = calculateColumnCount();
+          if (newColumnCount !== columnCount) {
+            setColumnCount(newColumnCount);
+          }
+        }
+      }, 200); // Slightly longer delay to prevent rapid changes
     };
 
-    handleResize();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeoutId);
+    };
   }, [calculateColumnCount, columnCount]);
 
   // Redistribute when photos or column count changes
@@ -95,6 +117,18 @@ const PhotoGallery: React.FC = () => {
       setColumns(newColumns);
     }
   }, [photos, distributePhotosToColumns]);
+
+  // Initialize columns immediately when component mounts
+  useEffect(() => {
+    // Set initial empty columns based on screen size
+    const initialCols = getInitialColumnCount();
+    const emptyColumns: Column[] = Array.from({ length: initialCols }, () => ({
+      photos: [],
+      height: 0
+    }));
+    setColumns(emptyColumns);
+    setColumnCount(initialCols);
+  }, []);
 
   // Load all photos
   const loadAllPhotos = useCallback(async () => {
