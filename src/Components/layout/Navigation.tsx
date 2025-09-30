@@ -2,11 +2,13 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import AuthDropdown from '../auth/AuthDropdown';
 import { useAuth } from '../../auth/useAuth';
+import { useTheme } from '../../contexts/ThemeContext';
 import './Navigation.css';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
   const { hasCrudRole } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -67,6 +69,14 @@ const Navigation: React.FC = () => {
         </div>
 
         <div className="nav-actions">
+          <button
+            className="theme-toggle-nav"
+            onClick={toggleTheme}
+            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <span className="nav-icon">{isDarkMode ? '☀️' : '🌙'}</span>
+          </button>
           <AuthDropdown />
         </div>
       </div>

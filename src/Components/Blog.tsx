@@ -142,17 +142,6 @@ const Blog: React.FC = () => {
           ))}
         </div>
       </div>
-
-      <div className="blog-footer">
-        <div className="newsletter-section">
-          <h3>Stay Updated</h3>
-          <p>Get notified when I publish new posts about development and photography.</p>
-          <div className="newsletter-form">
-            <input type="email" placeholder="Enter your email" className="email-input" />
-            <button className="subscribe-btn">Subscribe</button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

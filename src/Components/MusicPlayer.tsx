@@ -20,15 +20,15 @@ const MusicPlayer: React.FC = () => {
   const tracks: Track[] = [
     {
       id: '1',
-      title: 'Soft Inspiring Corporate',
-      artist: 'Background Music',
-      file: '/audio/soft-inspiring-corporate-background-music-409687.mp3'
-    },
-      {
-      id: '2',
       title: 'Golden Brown Instruental',
       artist: 'Mattip-music',
       file: '/audio/Golden Brown V2.mp3'
+    },
+    {
+      id: '2',
+      title: 'Missing Life',
+      artist: 'Background Music',
+      file: '/audio/gabriawll, QKReign - Missing Life [NCS Release].mp3'
     }
   ];
 

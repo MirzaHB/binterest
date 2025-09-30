@@ -9,25 +9,22 @@ const Home: React.FC = () => {
     <div className="home-container">
       <div className="hero-section">
         <div className="hero-content">
-          <div className="greeting-animation">
-            <span className="wave">👋</span>
-            <h1 className="hero-title">
-              Hello, I am{' '}
-              <span className="brand-highlight">
-                <TypewriterEffect
-                  texts={[
-                    'Hassan Baig',
-                    'A software engineer',
-                    'A coffee-addicted, animal loving software nerd'
-                  ]}
-                  speed={80}
-                  deleteSpeed={40}
-                  delay={2500}
-                  className="typewriter-text"
-                />
-              </span>
-            </h1>
-          </div>
+          <h1 className="hero-title">
+            Hello, I am{' '}
+            <span className="brand-highlight">
+              <TypewriterEffect
+                texts={[
+                  'Hassan Baig',
+                  'A software engineer',
+                  'A coffee-addicted, animal loving software nerd'
+                ]}
+                speed={80}
+                deleteSpeed={40}
+                delay={2500}
+                className="typewriter-text"
+              />
+            </span>
+          </h1>
 
           <p className="hero-subtitle">
             A passionate developer and creative storyteller crafting digital experiences that inspire and connect.

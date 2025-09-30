@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './Components/layout/Layout';
 import Home from './Components/Home';
 import PhotoUpload from './Components/photos/PhotoUpload';
@@ -9,34 +10,37 @@ import BlogUpload from './Components/blog/BlogUpload';
 import BlogPost from './Components/blog/BlogPost';
 import BlogEditor from './Components/blog/BlogEditor';
 import AdminRoute from './Components/auth/AdminRoute';
+import './styles/darkTheme.css';
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/photo-upload" element={
-            <AdminRoute>
-              <PhotoUpload />
-            </AdminRoute>
-          } />
-          <Route path="/photos" element={<PhotoGallery />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:id" element={<BlogPost />} />
-          <Route path="/blog-upload" element={
-            <AdminRoute>
-              <BlogUpload />
-            </AdminRoute>
-          } />
-          <Route path="/blog-editor" element={
-            <AdminRoute>
-              <BlogEditor />
-            </AdminRoute>
-          } />
-        </Routes>
-      </Layout>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/photo-upload" element={
+              <AdminRoute>
+                <PhotoUpload />
+              </AdminRoute>
+            } />
+            <Route path="/photos" element={<PhotoGallery />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogPost />} />
+            <Route path="/blog-upload" element={
+              <AdminRoute>
+                <BlogUpload />
+              </AdminRoute>
+            } />
+            <Route path="/blog-editor" element={
+              <AdminRoute>
+                <BlogEditor />
+              </AdminRoute>
+            } />
+          </Routes>
+        </Layout>
+      </Router>
+    </ThemeProvider>
   );
 };
 
