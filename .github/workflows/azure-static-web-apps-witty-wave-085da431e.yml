@@ -33,6 +33,9 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         env:
           CI: false
+          REACT_APP_MSAL_CLIENT_ID: ${{ secrets.REACT_APP_MSAL_CLIENT_ID }}
+          REACT_APP_MSAL_TENANT_ID: ${{ secrets.REACT_APP_MSAL_TENANT_ID }}
+          REACT_APP_MSAL_REDIRECT_URI: ${{ secrets.REACT_APP_MSAL_REDIRECT_URI }}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WITTY_WAVE_085DA431E }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
