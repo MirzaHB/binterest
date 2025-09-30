@@ -84,11 +84,8 @@ const MusicPlayer: React.FC = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
-        console.log('Music paused');
       } else {
-        console.log('Attempting to play:', tracks[currentTrack].file);
         audioRef.current.play()
-          .then(() => console.log('Music started playing'))
           .catch((error) => {
             console.error('Failed to play audio:', error);
             // Try to reload the audio element
@@ -138,7 +135,6 @@ const MusicPlayer: React.FC = () => {
             className="music-mini-control"
             onClick={(e) => {
               e.stopPropagation();
-              console.log('Mini control clicked, current isPlaying:', isPlaying);
               togglePlay();
             }}
             title={isPlaying ? 'Pause' : 'Play'}

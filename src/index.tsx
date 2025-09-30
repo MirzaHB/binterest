@@ -12,45 +12,33 @@ const msalInstance = new PublicClientApplication(msalConfig);
 
 // Add event callbacks to track authentication
 msalInstance.addEventCallback((event) => {
-  console.log('🔄 MSAL Event:', event.eventType, event);
-
   if (event.eventType === 'msal:loginSuccess') {
-    console.log('✅ Login successful!', event.payload);
+    // Login successful - no action needed
   }
 
   if (event.eventType === 'msal:loginFailure') {
-    console.log('❌ Login failed!', event.payload);
+    // Login failed - no action needed
   }
 
   if (event.eventType === 'msal:acquireTokenSuccess') {
-    console.log('🎟️ Token acquired!', event.payload);
+    // Token acquired - no action needed
   }
 
   if (event.eventType === 'msal:acquireTokenFailure') {
-    console.log('❌ Token acquisition failed!', event.payload);
+    // Token acquisition failed - no action needed
   }
 });
 
 // Initialize MSAL and handle redirects
 msalInstance.initialize().then(() => {
-  console.log('🚀 MSAL initialized successfully');
-
   // Handle redirect promise
   return msalInstance.handleRedirectPromise();
 }).then((response) => {
   if (response) {
-    console.log('🔄 Redirect response received:', response);
-
     if (response.account) {
-      console.log('✅ Account from redirect:', response.account);
-      console.log('🎭 ID Token Claims:', response.account.idTokenClaims);
-
       // Set active account
       msalInstance.setActiveAccount(response.account);
-      console.log('🎯 Active account set');
     }
-  } else {
-    console.log('ℹ️ No redirect response (user may not have logged in)');
   }
 }).catch((error) => {
   console.error('❌ MSAL initialization or redirect handling failed:', error);

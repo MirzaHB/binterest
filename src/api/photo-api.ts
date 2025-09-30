@@ -51,8 +51,6 @@ export const getPhotos = async (limit: number = 5, skip: number = 0): Promise<Ph
       lastModified: photo.lastModified
     }));
 
-    console.log('🚀 Using Direct Azure URLs for maximum speed!');
-
     return transformedPhotos;
   } catch (error) {
     console.error('Error in getPhotos:', error);

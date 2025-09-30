@@ -9,12 +9,7 @@ const AuthDropdown: React.FC = () => {
   const { isAuthenticated, currentUser, instance } = useAuth();
 
   const handleLogin = async () => {
-    console.log('🔐 Login button clicked!');
-    console.log('🔧 MSAL instance:', instance);
-    console.log('📝 Login request:', loginRequest);
-
     try {
-      console.log('🚀 Attempting login redirect...');
       await instance.loginRedirect(loginRequest);
     } catch (error) {
       console.error('❌ Login failed:', error);
