@@ -10,6 +10,7 @@ interface Track {
 
 const MusicPlayer: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const wasPlayingRef = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(0);
   const [volume, setVolume] = useState(0.3); // Start at 30% volume
@@ -22,6 +23,12 @@ const MusicPlayer: React.FC = () => {
       title: 'Soft Inspiring Corporate',
       artist: 'Background Music',
       file: '/audio/soft-inspiring-corporate-background-music-409687.mp3'
+    },
+      {
+      id: '2',
+      title: 'Golden Brown Instruental',
+      artist: 'Mattip-music',
+      file: '/audio/Golden Brown V2.mp3'
     }
   ];
 
@@ -29,8 +36,49 @@ const MusicPlayer: React.FC = () => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
       audioRef.current.loop = true; // Loop the current track
+
+      // Sync state with actual audio element
+      const audio = audioRef.current;
+      const updatePlayingState = () => {
+        setIsPlaying(!audio.paused);
+      };
+
+      audio.addEventListener('play', updatePlayingState);
+      audio.addEventListener('pause', updatePlayingState);
+
+      return () => {
+        audio.removeEventListener('play', updatePlayingState);
+        audio.removeEventListener('pause', updatePlayingState);
+      };
     }
   }, [volume]);
+
+  // Separate effect for initial setup
+  useEffect(() => {
+    if (audioRef.current) {
+      const audio = audioRef.current;
+      // Set initial state based on audio element
+      setIsPlaying(!audio.paused);
+    }
+  }, []);
+
+  // Handle track changes while preserving play state
+  useEffect(() => {
+    if (audioRef.current) {
+      const audio = audioRef.current;
+
+      // Load the new track
+      audio.load();
+
+      // If music was playing before track change, start the new track
+      if (wasPlayingRef.current) {
+        const playPromise = audio.play();
+        if (playPromise) {
+          playPromise.catch(console.error);
+        }
+      }
+    }
+  }, [currentTrack]);
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -47,17 +95,16 @@ const MusicPlayer: React.FC = () => {
             audioRef.current?.load();
           });
       }
-      setIsPlaying(!isPlaying);
+      // Remove manual state setting - let the audio events handle it
     }
   };
 
   const nextTrack = () => {
+    // Store current playing state before changing tracks
+    wasPlayingRef.current = isPlaying;
     const next = (currentTrack + 1) % tracks.length;
     setCurrentTrack(next);
-    if (isPlaying && audioRef.current) {
-      audioRef.current.load();
-      audioRef.current.play().catch(console.error);
-    }
+    // Track change playback is handled in useEffect
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,13 +123,30 @@ const MusicPlayer: React.FC = () => {
   return (
     <>
       {/* Music toggle button */}
-      <button
-        className="music-toggle-btn"
-        onClick={() => setShowPlayer(!showPlayer)}
-        title="Background Music"
-      >
-        🎵
-      </button>
+      <div className="music-toggle-container">
+        <button
+          className="music-toggle-btn"
+          onClick={() => setShowPlayer(!showPlayer)}
+          title="Background Music"
+        >
+          🎵
+        </button>
+
+        {/* Mini play/pause button when player is minimized */}
+        {!showPlayer && (
+          <button
+            className="music-mini-control"
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('Mini control clicked, current isPlaying:', isPlaying);
+              togglePlay();
+            }}
+            title={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? '⏸️' : '▶️'}
+          </button>
+        )}
+      </div>
 
       {/* Music player panel */}
       {showPlayer && (
@@ -133,15 +197,15 @@ const MusicPlayer: React.FC = () => {
             />
           </div>
 
-          <audio
-            ref={audioRef}
-            src={tracks[currentTrack].file}
-            onEnded={handleAudioEnd}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-          />
         </div>
       )}
+
+      {/* Audio element - always present so music doesn't stop */}
+      <audio
+        ref={audioRef}
+        src={tracks[currentTrack].file}
+        onEnded={handleAudioEnd}
+      />
     </>
   );
 };

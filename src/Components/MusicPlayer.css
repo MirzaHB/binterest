@@ -1,8 +1,16 @@
-/* Music toggle button */
-.music-toggle-btn {
+/* Music toggle container */
+.music-toggle-container {
   position: fixed;
   bottom: 20px;
   right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+}
+
+/* Music toggle button */
+.music-toggle-btn {
   width: 50px;
   height: 50px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -13,7 +21,6 @@
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
   transition: all 0.3s ease;
-  z-index: 999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,6 +29,41 @@
 .music-toggle-btn:hover {
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* Mini play/pause control */
+.music-mini-control {
+  width: 40px;
+  height: 40px;
+  background: rgba(102, 126, 234, 0.9);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 3px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: slideIn 0.3s ease;
+}
+
+.music-mini-control:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Music player panel */
@@ -170,12 +212,21 @@
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-  .music-toggle-btn {
+  .music-toggle-container {
     bottom: 15px;
     right: 15px;
+  }
+
+  .music-toggle-btn {
     width: 45px;
     height: 45px;
     font-size: 1.1rem;
+  }
+
+  .music-mini-control {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
   }
 
   .music-player {
