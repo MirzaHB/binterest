@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import './BlogEditor.css';
 import { uploadBlog } from '../../api/blog-api';
+import { useAuth } from '../../auth/useAuth';
 
 const BlogEditor: React.FC = () => {
+  const { getAccessToken } = useAuth();
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [author, setAuthor] = useState('');
@@ -23,6 +25,12 @@ const BlogEditor: React.FC = () => {
       setUploading(true);
       setMessage(null);
 
+      // Get access token first
+      const accessToken = await getAccessToken();
+      if (!accessToken) {
+        throw new Error('Unable to get access token. Please try logging in again.');
+      }
+
       // Create a markdown file from the content
       const markdownContent = `# ${title}\n\n${content}`;
       const blob = new Blob([markdownContent], { type: 'text/markdown' });
@@ -34,7 +42,7 @@ const BlogEditor: React.FC = () => {
         summary: summary.trim(),
         author: author.trim(),
         tags: tags.trim()
-      });
+      }, accessToken);
 
       setMessage({ type: 'success', text: `Blog "${result.title}" published successfully!` });
 

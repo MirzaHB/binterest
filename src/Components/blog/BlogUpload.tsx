@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { createBlog, CreateBlogRequest } from '../../api/blog-api';
+import { useAuth } from '../../auth/useAuth';
 import './BlogUpload.css';
 
 const BlogUpload: React.FC = () => {
+  const { getAccessToken } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
@@ -33,6 +35,12 @@ const BlogUpload: React.FC = () => {
       setUploading(true);
       setError(null);
 
+      // Get access token first
+      const accessToken = await getAccessToken();
+      if (!accessToken) {
+        throw new Error('Unable to get access token. Please try logging in again.');
+      }
+
       const blogData: CreateBlogRequest = {
         file,
         title: title.trim() || undefined,
@@ -41,7 +49,7 @@ const BlogUpload: React.FC = () => {
         tags: tags.trim() || undefined,
       };
 
-      const result = await createBlog(blogData);
+      const result = await createBlog(blogData, accessToken);
       setUploadResult(`Blog uploaded successfully: ${result.message}`);
 
       // Reset form

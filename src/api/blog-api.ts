@@ -53,7 +53,7 @@ export const getBlog = async (id: string): Promise<BlogPost> => {
 };
 
 // Create a new blog post
-export const createBlog = async (blogData: CreateBlogRequest): Promise<CreateBlogResponse> => {
+export const createBlog = async (blogData: CreateBlogRequest, accessToken: string): Promise<CreateBlogResponse> => {
   const formData = new FormData();
   formData.append('file', blogData.file);
 
@@ -65,6 +65,7 @@ export const createBlog = async (blogData: CreateBlogRequest): Promise<CreateBlo
   const response = await apiClient.post<CreateBlogResponse>('/blogs', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${accessToken}`,
     },
   });
 
@@ -130,6 +131,6 @@ export const calculateReadTime = (content: string): string => {
 };
 
 // Convenience function for the blog editor
-export const uploadBlog = async (blogData: CreateBlogRequest): Promise<CreateBlogResponse> => {
-  return createBlog(blogData);
+export const uploadBlog = async (blogData: CreateBlogRequest, accessToken: string): Promise<CreateBlogResponse> => {
+  return createBlog(blogData, accessToken);
 };
