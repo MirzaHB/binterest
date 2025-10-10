@@ -431,3 +431,209 @@
 .dark-theme .back-btn:hover {
   background: #764ba2;
 }
+
+/* PhotoUpload dark styles */
+.dark-theme .photo-upload {
+  background: rgba(45, 55, 72, 0.95);
+  box-shadow: 0 4px 20px var(--shadow-color);
+}
+
+.dark-theme .upload-title {
+  color: var(--text-primary);
+}
+
+.dark-theme .file-input-label {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: var(--border-color);
+}
+
+.dark-theme .file-input-label:hover:not(.disabled) {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+}
+
+.dark-theme .upload-text {
+  color: var(--text-primary);
+}
+
+.dark-theme .upload-hint {
+  color: var(--text-muted);
+}
+
+.dark-theme .preview-container {
+  background: rgba(26, 32, 44, 0.8);
+  border-color: var(--border-color);
+}
+
+.dark-theme .file-name {
+  color: var(--text-primary);
+}
+
+.dark-theme .file-size {
+  color: var(--text-muted);
+}
+
+.dark-theme .status-message.success {
+  background: rgba(72, 187, 120, 0.2);
+  color: #48bb78;
+  border-color: rgba(72, 187, 120, 0.4);
+}
+
+.dark-theme .status-message.error {
+  background: rgba(245, 101, 101, 0.2);
+  color: #f56565;
+  border-color: rgba(245, 101, 101, 0.4);
+}
+
+/* BlogUpload dark styles */
+.dark-theme .blog-upload-container .upload-title {
+  color: var(--text-primary);
+}
+
+.dark-theme .blog-upload-container .upload-subtitle {
+  color: var(--text-muted);
+}
+
+.dark-theme .upload-form {
+  background: rgba(45, 55, 72, 0.8);
+  border-color: var(--border-color);
+  box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+.dark-theme .file-upload-area {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: var(--border-color);
+}
+
+.dark-theme .file-upload-area:hover {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.dark-theme .file-selected {
+  background: rgba(26, 32, 44, 0.8);
+  border-color: var(--border-color);
+}
+
+.dark-theme .file-name,
+.dark-theme .upload-text {
+  color: var(--text-primary);
+}
+
+.dark-theme .file-size,
+.dark-theme .upload-hint {
+  color: var(--text-muted);
+}
+
+.dark-theme .form-label {
+  color: var(--text-primary);
+}
+
+.dark-theme .form-input,
+.dark-theme .form-textarea {
+  background: rgba(26, 32, 44, 0.8);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-theme .form-input::placeholder,
+.dark-theme .form-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.dark-theme .form-input:focus,
+.dark-theme .form-textarea:focus {
+  background: rgba(26, 32, 44, 0.9);
+  border-color: #667eea;
+}
+
+.dark-theme .upload-error {
+  background: rgba(245, 101, 101, 0.2);
+  color: #f56565;
+  border-color: rgba(245, 101, 101, 0.4);
+}
+
+.dark-theme .upload-success {
+  background: rgba(72, 187, 120, 0.2);
+  color: #48bb78;
+  border-color: rgba(72, 187, 120, 0.4);
+}
+
+/* BlogEditor dark styles */
+.dark-theme .blog-editor {
+  background: transparent;
+}
+
+.dark-theme .editor-header {
+  border-bottom-color: var(--border-color);
+}
+
+.dark-theme .editor-title {
+  color: var(--text-primary);
+}
+
+.dark-theme .editor-subtitle {
+  color: var(--text-muted);
+}
+
+.dark-theme .message.success {
+  background: rgba(72, 187, 120, 0.2);
+  color: #48bb78;
+  border-color: rgba(72, 187, 120, 0.4);
+}
+
+.dark-theme .message.error {
+  background: rgba(245, 101, 101, 0.2);
+  color: #f56565;
+  border-color: rgba(245, 101, 101, 0.4);
+}
+
+.dark-theme .form-group label {
+  color: var(--text-primary);
+}
+
+.dark-theme .form-group input,
+.dark-theme .form-group textarea {
+  background: rgba(45, 55, 72, 0.9);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-theme .form-group input::placeholder,
+.dark-theme .form-group textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.dark-theme .form-group input:focus,
+.dark-theme .form-group textarea:focus {
+  background: rgba(26, 32, 44, 0.9);
+  border-color: #667eea;
+}
+
+.dark-theme .char-count {
+  color: var(--text-muted);
+}
+
+.dark-theme .editor-toolbar {
+  border-bottom-color: var(--border-color);
+}
+
+.dark-theme .stat {
+  color: var(--text-muted);
+}
+
+.dark-theme .form-actions {
+  border-top-color: var(--border-color);
+}
+
+.dark-theme .btn-secondary {
+  background: rgba(45, 55, 72, 0.9);
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+
+.dark-theme .btn-secondary:hover:not(:disabled) {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+  color: var(--text-secondary);
+}
