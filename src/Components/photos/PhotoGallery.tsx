@@ -16,12 +16,6 @@ const PhotoGallery: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [columns, setColumns] = useState<Column[]>([]);
 
-  // Infinite scroll state
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [skip, setSkip] = useState(0);
-  const PHOTOS_PER_PAGE = 10;
-
   // Calculate initial column count based on screen size
   const getInitialColumnCount = () => {
     if (typeof window !== 'undefined') {
@@ -37,7 +31,6 @@ const PhotoGallery: React.FC = () => {
   const [columnCount, setColumnCount] = useState(getInitialColumnCount);
   const [imageHeights, setImageHeights] = useState<{[key: string]: number}>({});
   const galleryRef = useRef<HTMLDivElement>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Calculate optimal column count based on screen width
   const calculateColumnCount = useCallback(() => {
@@ -138,46 +131,20 @@ const PhotoGallery: React.FC = () => {
     setColumnCount(initialCols);
   }, []);
 
-  // Load more photos (for infinite scroll)
-  const loadMorePhotos = useCallback(async () => {
-    if (loadingMore || !hasMore) return;
-
+  // Load all photos
+  const loadAllPhotos = useCallback(async () => {
     try {
-      setLoadingMore(true);
+      setLoading(true);
       setError(null);
-
-      const photoData = await getPhotos(PHOTOS_PER_PAGE, skip);
-
-      // If we got fewer photos than requested, we've reached the end
-      if (photoData.length < PHOTOS_PER_PAGE) {
-        setHasMore(false);
-      }
-
-      // If no photos returned, we're done
-      if (photoData.length === 0) {
-        setHasMore(false);
-        setLoading(false);
-        setLoadingMore(false);
-        return;
-      }
-
-      // Append new photos to existing ones, filter out duplicates
-      setPhotos(prev => {
-        const existingBlobNames = new Set(prev.map(p => p.blobName));
-        const newPhotos = photoData.filter(p => !existingBlobNames.has(p.blobName));
-        return [...prev, ...newPhotos];
-      });
-
-      // Update skip to current total
-      setSkip(prevSkip => prevSkip + PHOTOS_PER_PAGE);
+      const photoData = await getPhotos(10000, 0);
+      setPhotos(photoData);
     } catch (error) {
       console.error('Failed to load photos:', error);
       setError(error instanceof Error ? error.message : 'Failed to load photos');
     } finally {
-      setLoadingMore(false);
       setLoading(false);
     }
-  }, [skip, hasMore, loadingMore, PHOTOS_PER_PAGE]);
+  }, []);
 
   // Handle image load - store actual height and redistribute
   const handleImageLoad = useCallback((blobName: string, element: HTMLImageElement) => {
@@ -218,45 +185,20 @@ const PhotoGallery: React.FC = () => {
     setSelectedPhoto(null);
   };
 
-  // Load initial photos on mount
+  // Load photos on mount
   useEffect(() => {
-    loadMorePhotos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Intersection Observer for infinite scroll
-  useEffect(() => {
-    if (!sentinelRef.current || !hasMore) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // When sentinel is visible and we have more photos to load
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          loadMorePhotos();
-        }
-      },
-      {
-        // Trigger when sentinel is 200px away from viewport
-        rootMargin: '200px',
-      }
-    );
-
-    observer.observe(sentinelRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [hasMore, loadingMore, loadMorePhotos]);
+    loadAllPhotos();
+  }, [loadAllPhotos]);
 
   if (loading) {
     return <div className="loading">Loading photos…</div>;
   }
 
-  if (error && photos.length === 0) {
+  if (error) {
     return (
       <div className="empty-state">
         <p>Error loading photos: {error}</p>
-        <button onClick={loadMorePhotos} style={{ marginTop: '10px', padding: '8px 16px' }}>
+        <button onClick={loadAllPhotos} style={{ marginTop: '10px', padding: '8px 16px' }}>
           Retry
         </button>
       </div>
@@ -298,23 +240,6 @@ const PhotoGallery: React.FC = () => {
           </div>
         ))}
       </div>
-
-      {/* Sentinel element for infinite scroll */}
-      {hasMore && (
-        <div ref={sentinelRef} style={{ height: '20px', margin: '20px 0' }}>
-          {loadingMore && (
-            <div style={{ textAlign: 'center', padding: '20px', color: '#667eea' }}>
-              Loading more photos...
-            </div>
-          )}
-        </div>
-      )}
-
-      {!hasMore && photos.length > 0 && (
-        <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
-          You've reached the end! 🎉
-        </div>
-      )}
 
       <PhotoModal
         photo={selectedPhoto}
