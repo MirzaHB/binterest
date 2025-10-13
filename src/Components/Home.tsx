@@ -59,30 +59,45 @@ const Home: React.FC = () => {
         </div>
 
         <div className="about-content">
-          <div className="about-text">
-            <p className="about-intro">
-              Welcome to my corner of the internet! I'm a full-stack developer with a passion for creating meaningful digital experiences.
-            </p>
+          <div className="about-cards">
+            <div className="about-card">
+              <span className="card-icon">🤔</span>
+              <h3 className="card-title">Curious Thinker</h3>
+              <p className="card-description">
+                I'm endlessly curious about how things work at their core, diving into the smallest details that make everything tick.
+              </p>
+            </div>
 
-            <p>
-              When I'm not coding, you'll find me behind the camera capturing life's beautiful moments, exploring new technologies,
-              or writing about the intersection of creativity and technology. I believe that great software isn't just functional—it's elegant,
-              intuitive, and tells a story.
-            </p>
+            <div className="about-card">
+              <span className="card-icon">⚙️</span>
+              <h3 className="card-title">Low-Level Enthusiast</h3>
+              <p className="card-description">
+                Low-level programming fascinates me - understanding the foundation of operating systems and modern languages empowers my coding approach.
+              </p>
+            </div>
 
-            <p>
-              My journey spans from building scalable cloud applications to crafting pixel-perfect user interfaces.
-              I love solving complex problems with simple, elegant solutions, and I'm always excited to learn something new.
-            </p>
+            <div className="about-card">
+              <span className="card-icon">🌐</span>
+              <h3 className="card-title">Full-Stack Developer</h3>
+              <p className="card-description">
+                Building and hosting web applications from scratch, both frontend and backend, gives me the thrill of creating something people can interact with.
+              </p>
+            </div>
 
-            <div className="current-focus">
-              <h4>Currently exploring:</h4>
-              <div className="focus-tags">
-                <span className="tag">React & TypeScript</span>
-                <span className="tag">Azure Cloud</span>
-                <span className="tag">Photography</span>
-                <span className="tag">UI/UX Design</span>
-              </div>
+            <div className="about-card">
+              <span className="card-icon">📚</span>
+              <h3 className="card-title">Continuous Learner</h3>
+              <p className="card-description">
+                I constantly experiment with new technologies and frameworks in my free time, pushing my skills further through self-directed learning.
+              </p>
+            </div>
+
+            <div className="about-card">
+              <span className="card-icon">💡</span>
+              <h3 className="card-title">Creative Problem Solver</h3>
+              <p className="card-description">
+                Software engineering allows me to combine creativity and logic, which keeps me excited about the field every day.
+              </p>
             </div>
           </div>
         </div>

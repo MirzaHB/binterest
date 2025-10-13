@@ -114,21 +114,23 @@
   color: var(--text-primary);
 }
 
-.dark-theme .about-text {
-  color: var(--text-muted);
-}
-
-.dark-theme .about-intro {
-  color: var(--text-secondary);
-}
-
-.dark-theme .current-focus {
-  background: rgba(45, 55, 72, 0.7);
+.dark-theme .about-card {
+  background: rgba(45, 55, 72, 0.8);
   border-color: var(--border-color);
+  box-shadow: 0 10px 30px var(--shadow-color);
 }
 
-.dark-theme .current-focus h4 {
+.dark-theme .about-card:hover {
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.dark-theme .card-title {
   color: var(--text-secondary);
+}
+
+.dark-theme .card-description {
+  color: var(--text-muted);
 }
 
 /* Connect section dark styles */
@@ -636,4 +638,30 @@
   background: rgba(102, 126, 234, 0.2);
   border-color: #667eea;
   color: var(--text-secondary);
+}
+
+/* Mobile Navigation Dark Theme */
+@media (max-width: 768px) {
+  .dark-theme .navigation {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border-bottom: none;
+    box-shadow: none;
+  }
+
+  .dark-theme .nav-container {
+    background: transparent !important;
+  }
+
+  .dark-theme .nav-brand {
+    display: none; /* Hide brand on mobile */
+  }
+
+  .dark-theme .nav-actions {
+    background: rgba(45, 55, 72, 0.95);
+  }
+
+  .dark-theme .nav-menu {
+    background: rgba(45, 55, 72, 0.98);
+  }
 }
