@@ -216,27 +216,32 @@ const PhotoGallery: React.FC = () => {
       <div className="photo-grid-balanced">
         {columns.map((column, columnIndex) => (
           <div key={columnIndex} className="photo-column">
-            {column.photos.map((photo, photoIndex) => (
-              <div
-                key={photo.blobName || `photo-${photoIndex}`}
-                className="photo-item"
-                onClick={() => handlePhotoClick(photo)}
-              >
-                <img
-                  src={photo.url}
-                  alt={`Gallery item ${photoIndex + 1}`}
-                  loading="lazy"
-                  onLoad={(e) => handleImageLoad(photo.blobName, e.currentTarget)}
-                  style={{
-                    width: '100%',
-                    height: 'auto',
-                    display: 'block',
-                    borderRadius: '8px',
-                    cursor: 'pointer'
-                  }}
-                />
-              </div>
-            ))}
+            {column.photos.map((photo, photoIndex) => {
+              // Calculate global index to determine if photo should load eagerly
+              const globalIndex = photos.findIndex(p => p.blobName === photo.blobName);
+
+              return (
+                <div
+                  key={photo.blobName || `photo-${photoIndex}`}
+                  className="photo-item"
+                  onClick={() => handlePhotoClick(photo)}
+                >
+                  <img
+                    src={photo.url}
+                    alt={`Gallery item ${photoIndex + 1}`}
+                    loading={globalIndex < 8 ? "eager" : "lazy"}
+                    onLoad={(e) => handleImageLoad(photo.blobName, e.currentTarget)}
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      display: 'block',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  />
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>
