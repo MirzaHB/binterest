@@ -9,8 +9,13 @@ const Home: React.FC = () => {
     <div className="home-container">
       <div className="hero-section">
         <div className="hero-content">
+          {/* Profile picture - shows on top for mobile */}
+          <div className="profile-picture-mobile">
+            <img src="/MEpfp.jpg" alt="Hassan Baig" className="profile-img" />
+          </div>
+
           <h1 className="hero-title">
-            Hello, I am{' '}
+            Hello, I am...
             <span className="brand-highlight">
               <TypewriterEffect
                 texts={[
@@ -27,7 +32,7 @@ const Home: React.FC = () => {
           </h1>
 
           <p className="hero-subtitle">
-            A passionate developer and creative storyteller crafting digital experiences that inspire and connect.
+            A perpetual learner and passionate developer transforming ideas into seamless digital realities.
           </p>
 
           <div className="hero-actions">
@@ -42,12 +47,10 @@ const Home: React.FC = () => {
           </div>
         </div>
 
+        {/* Profile picture - shows on right for desktop */}
         <div className="hero-visual">
-          <div className="floating-elements">
-            <div className="float-item code">{'<>'}</div>
-            <div className="float-item camera">📷</div>
-            <div className="float-item design">✨</div>
-            <div className="float-item rocket">🚀</div>
+          <div className="profile-picture-desktop">
+            <img src="/MEpfp.jpg" alt="Hassan Baig" className="profile-img" />
           </div>
         </div>
       </div>
@@ -98,6 +101,65 @@ const Home: React.FC = () => {
               <p className="card-description">
                 Software engineering allows me to combine creativity and logic, which keeps me excited about the field every day.
               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="experience-section">
+        <div className="section-header">
+          <h2>Experience</h2>
+          <div className="section-line"></div>
+        </div>
+
+        <div className="timeline">
+          <div className="timeline-item">
+            <div className="timeline-dot"></div>
+            <div className="timeline-content">
+              <span className="timeline-date">May 2025 - Present</span>
+              <h3 className="timeline-title">Software Engineer Intern</h3>
+              <h4 className="timeline-company">Canadian UAVS</h4>
+              <p className="timeline-description">
+                Working on X-band radar systems supporting critical aerospace monitoring operations
+              </p>
+              <div className="timeline-tags">
+                <span className="timeline-tag">C#</span>
+                <span className="timeline-tag">Azure</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="timeline-item">
+            <div className="timeline-dot"></div>
+            <div className="timeline-content">
+              <span className="timeline-date">Jan 2024 - Aug 2024</span>
+              <h3 className="timeline-title">Software Engineer Intern</h3>
+              <h4 className="timeline-company">Symend</h4>
+              <p className="timeline-description">
+                Worked on a platform to manage customer Engagement through behavioural science.
+                Our Platform Managed millions of cutomers for major companies such as American Express, Telus, and BMO. 
+              </p>
+              <div className="timeline-tags">
+                <span className="timeline-tag">Typescript</span>
+                <span className="timeline-tag">C#</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="timeline-item">
+            <div className="timeline-dot"></div>
+            <div className="timeline-content">
+              <span className="timeline-date">2021 - Present</span>
+              <h3 className="timeline-title">Bachelor's Degree</h3>
+              <h4 className="timeline-company">University of Calgary</h4>
+              <p className="timeline-description">
+                Bachelors of Science in Software Engineering.
+              </p>
+              <div className="timeline-tags">
+                <span className="timeline-tag">Networked Systems</span>
+                <span className="timeline-tag">Algorithms</span>
+                <span className="timeline-tag">OOP</span>
+              </div>
             </div>
           </div>
         </div>

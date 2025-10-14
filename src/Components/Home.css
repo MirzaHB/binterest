@@ -141,71 +141,49 @@
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
-/* Hero Visual Section */
+/* Hero Visual Section - Profile Picture */
 .hero-visual {
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  height: 400px;
 }
 
-.floating-elements {
-  position: relative;
-  width: 300px;
-  height: 300px;
-}
-
-.float-item {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
+/* Desktop profile picture */
+.profile-picture-desktop {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(102, 126, 234, 0.1);
-  animation: float 6s ease-in-out infinite;
+  width: 300px;
+  height: 380px;
+  border-radius: 30px;
+  overflow: hidden;
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(102, 126, 234, 0.3);
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+  transition: box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              border-color 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  flex-shrink: 0;
 }
 
-.float-item.code {
-  top: 20%;
-  left: 20%;
-  color: #667eea;
-  animation-delay: 0s;
+.profile-picture-desktop .profile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.float-item.camera {
-  top: 10%;
-  right: 20%;
-  color: #fd79a8;
-  animation-delay: 1.5s;
+.profile-picture-desktop:hover {
+  transform: scale(1.05);
+  box-shadow: 0 25px 80px rgba(102, 126, 234, 0.4);
+  border-color: rgba(102, 126, 234, 0.5);
 }
 
-.float-item.design {
-  bottom: 30%;
-  left: 10%;
-  color: #fdcb6e;
-  animation-delay: 3s;
-}
-
-.float-item.rocket {
-  bottom: 20%;
-  right: 10%;
-  color: #00b894;
-  animation-delay: 4.5s;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  25% { transform: translateY(-20px) rotate(5deg); }
-  50% { transform: translateY(-10px) rotate(-3deg); }
-  75% { transform: translateY(-15px) rotate(3deg); }
+/* Mobile profile picture - hidden on desktop */
+.profile-picture-mobile {
+  display: none;
 }
 
 /* About Section */
@@ -290,6 +268,139 @@
   margin: 0;
 }
 
+/* Experience Section */
+.experience-section {
+  padding: 6rem 0;
+  margin: 0 auto;
+}
+
+.timeline {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+/* Center line for desktop */
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+}
+
+.timeline-item {
+  position: relative;
+  width: 50%;
+  padding-right: 50px;
+  margin-bottom: 4rem;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Alternate items to right side */
+.timeline-item:nth-child(even) {
+  margin-left: 50%;
+  padding-right: 0;
+  padding-left: 50px;
+}
+
+.timeline-dot {
+  position: absolute;
+  right: -12px;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 4px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+  z-index: 1;
+}
+
+/* Dot position for right side items */
+.timeline-item:nth-child(even) .timeline-dot {
+  right: auto;
+  left: -12px;
+}
+
+.timeline-content {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 2px solid rgba(102, 126, 234, 0.1);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.timeline-content:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+.timeline-date {
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+.timeline-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0.5rem 0 0.3rem 0;
+  letter-spacing: -0.01em;
+}
+
+.timeline-company {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #667eea;
+  margin: 0 0 1rem 0;
+}
+
+.timeline-description {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #4a5568;
+  margin: 0 0 1.5rem 0;
+}
+
+.timeline-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.timeline-tag {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  color: #667eea;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.2s ease;
+}
+
+.timeline-tag:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+  border-color: rgba(102, 126, 234, 0.4);
+}
 
 /* Connect Section */
 .connect-section {
@@ -396,6 +507,31 @@
     min-height: auto;
   }
 
+  /* Show mobile profile picture, hide desktop version */
+  .profile-picture-mobile {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+
+  .profile-picture-mobile .profile-img {
+    width: 200px;
+    height: 260px;
+    border-radius: 25px;
+    object-fit: cover;
+    object-position: center 40%;
+    border: 5px solid rgba(102, 126, 234, 0.3);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+  }
+
+  .profile-picture-desktop {
+    display: none;
+  }
+
+  .hero-visual {
+    display: none;
+  }
+
   .hero-title {
     font-size: 2.8rem;
     min-height: 2.4em; /* Fixed height for 2 lines */
@@ -422,17 +558,6 @@
     font-size: 1rem;
   }
 
-  .floating-elements {
-    width: 250px;
-    height: 250px;
-  }
-
-  .float-item {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
-  }
-
   .about-section {
     padding: 4rem 0;
     margin: 2rem -1.5rem;
@@ -455,6 +580,61 @@
 
   .connect-section h3 {
     font-size: 2rem;
+  }
+
+  .experience-section {
+    padding: 4rem 0;
+  }
+
+  .timeline {
+    padding: 1.5rem 0;
+  }
+
+  /* Switch to left-aligned timeline on tablet */
+  .timeline::before {
+    left: 20px;
+    transform: none;
+  }
+
+  .timeline-item {
+    width: 100%;
+    padding-left: 60px;
+    padding-right: 0;
+    margin-bottom: 3rem;
+    margin-left: 0 !important;
+  }
+
+  .timeline-item:nth-child(even) {
+    padding-left: 60px;
+    padding-right: 0;
+  }
+
+  .timeline-dot {
+    left: 9px;
+    right: auto;
+    width: 24px;
+    height: 24px;
+  }
+
+  .timeline-item:nth-child(even) .timeline-dot {
+    left: 9px;
+    right: auto;
+  }
+
+  .timeline-content {
+    padding: 1.5rem;
+  }
+
+  .timeline-title {
+    font-size: 1.3rem;
+  }
+
+  .timeline-company {
+    font-size: 1rem;
+  }
+
+  .timeline-description {
+    font-size: 0.95rem;
   }
 
   .social-grid {
@@ -504,9 +684,13 @@
     padding: 1rem 1.5rem;
   }
 
-  .floating-elements {
-    width: 200px;
-    height: 200px;
+  .profile-picture-mobile .profile-img {
+    width: 180px;
+    height: 240px;
+    border-width: 4px;
+    border-radius: 22px;
+    object-fit: cover;
+    object-position: center 40%;
   }
 
   .about-section {
@@ -536,6 +720,57 @@
 
   .card-description {
     font-size: 0.95rem;
+  }
+
+  .experience-section {
+    padding: 3rem 0;
+  }
+
+  .timeline {
+    padding: 1rem 0;
+  }
+
+  .timeline::before {
+    left: 15px;
+    width: 2px;
+  }
+
+  .timeline-item {
+    padding-left: 50px;
+    margin-bottom: 2.5rem;
+  }
+
+  .timeline-dot {
+    left: 6px;
+    width: 20px;
+    height: 20px;
+    border-width: 3px;
+  }
+
+  .timeline-content {
+    padding: 1.25rem;
+  }
+
+  .timeline-date {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.85rem;
+  }
+
+  .timeline-title {
+    font-size: 1.15rem;
+  }
+
+  .timeline-company {
+    font-size: 0.95rem;
+  }
+
+  .timeline-description {
+    font-size: 0.9rem;
+  }
+
+  .timeline-tag {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.75rem;
   }
 
   .connect-section {

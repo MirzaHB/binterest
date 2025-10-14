@@ -18,7 +18,7 @@
   display: inline-block;
   width: 600px; /* Fixed width to fit longest text */
   height: 3.9em; /* Fixed height for 3 lines */
-  text-align: left;
+  text-align: center;
   vertical-align: top;
   white-space: normal;
   word-wrap: break-word;
