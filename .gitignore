@@ -20,9 +20,6 @@
 .env.production
 .env.production.local
 
-# Claude Code configuration
-.claude
-
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
