@@ -47,7 +47,6 @@ const Navigation: React.FC = () => {
       <div className="nav-container">
         <Link to="/" className="nav-brand">
           <span className="brand-icon">👨‍💻</span>
-          <span className="brand-text">Portfolio</span>
         </Link>
 
         <div ref={mobileMenuRef} className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>

@@ -137,11 +137,27 @@ const Home: React.FC = () => {
               <h4 className="timeline-company">Symend</h4>
               <p className="timeline-description">
                 Worked on a platform to manage customer Engagement through behavioural science.
-                Our Platform Managed millions of cutomers for major companies such as American Express, Telus, and BMO. 
+                Our Platform Managed millions of cutomers for major companies such as American Express, Telus, and BMO.
               </p>
               <div className="timeline-tags">
                 <span className="timeline-tag">Typescript</span>
                 <span className="timeline-tag">C#</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="timeline-item">
+            <div className="timeline-dot"></div>
+            <div className="timeline-content">
+              <span className="timeline-date">Oct 2022 - Jan 2024</span>
+              <h3 className="timeline-title">Software Engineer</h3>
+              <h4 className="timeline-company">Schulich UAVs Club</h4>
+              <p className="timeline-description">
+                Developed software systems for unmanned aerial vehicle operations at the University of Calgary's UAV club.
+              </p>
+              <div className="timeline-tags">
+                <span className="timeline-tag">Python</span>
+                <span className="timeline-tag">Javascript</span>
               </div>
             </div>
           </div>

@@ -45,14 +45,24 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  // Update document class and localStorage when theme changes
+  // Update document class, localStorage, and theme-color meta tags when theme changes
   useEffect(() => {
+    // Update both meta tags for proper theme-color on all browsers
+    const metaThemeColorLight = document.querySelector('meta[name="theme-color"][media*="light"]');
+    const metaThemeColorDark = document.querySelector('meta[name="theme-color"][media*="dark"]');
+
     if (isDarkMode) {
       document.documentElement.classList.add('dark-theme');
       localStorage.setItem('theme', 'dark');
+      // Update both meta tags to dark color (Safari needs this)
+      if (metaThemeColorLight) metaThemeColorLight.setAttribute('content', '#1a202c');
+      if (metaThemeColorDark) metaThemeColorDark.setAttribute('content', '#1a202c');
     } else {
       document.documentElement.classList.remove('dark-theme');
       localStorage.setItem('theme', 'light');
+      // Restore proper colors for each meta tag
+      if (metaThemeColorLight) metaThemeColorLight.setAttribute('content', '#f5f7fa');
+      if (metaThemeColorDark) metaThemeColorDark.setAttribute('content', '#1a202c');
     }
   }, [isDarkMode]);
 
