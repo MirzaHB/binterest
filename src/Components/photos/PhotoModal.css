@@ -48,6 +48,35 @@
   background: rgba(0, 0, 0, 0.9);
 }
 
+.photo-modal-delete {
+  position: absolute;
+  top: 15px;
+  right: 65px;
+  background: rgba(220, 38, 38, 0.8);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.photo-modal-delete:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 1);
+  transform: scale(1.05);
+}
+
+.photo-modal-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .photo-modal-content {
   display: flex;
   height: 100%;

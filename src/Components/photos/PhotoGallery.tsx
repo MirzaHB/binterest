@@ -185,6 +185,11 @@ const PhotoGallery: React.FC = () => {
     setSelectedPhoto(null);
   };
 
+  const handlePhotoDelete = () => {
+    // Refresh the gallery after deletion
+    loadAllPhotos();
+  };
+
   // Load photos on mount
   useEffect(() => {
     loadAllPhotos();
@@ -250,6 +255,7 @@ const PhotoGallery: React.FC = () => {
         photo={selectedPhoto}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onDelete={handlePhotoDelete}
       />
     </div>
   );

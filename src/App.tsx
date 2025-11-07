@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './Components/layout/Layout';
@@ -13,6 +13,15 @@ import AdminRoute from './Components/auth/AdminRoute';
 import './styles/darkTheme.css';
 
 const App: React.FC = () => {
+  // Wake up the backend server on app load
+  useEffect(() => {
+    fetch('https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api/health/wake')
+      .catch(() => {
+        // Silently fail - this is just to wake up the server
+        console.log('Backend wake-up call initiated');
+      });
+  }, []);
+
   return (
     <ThemeProvider>
       <Router>

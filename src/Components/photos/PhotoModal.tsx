@@ -1,21 +1,25 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { PhotoMetadata } from '../../api/photo-api';
+import { PhotoMetadata, deletePhoto } from '../../api/photo-api';
+import { useAuth } from '../../auth/useAuth';
 import './PhotoModal.css';
 
 interface PhotoModalProps {
   photo: PhotoMetadata | null;
   isOpen: boolean;
   onClose: () => void;
+  onDelete?: () => void;
 }
 
-const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose }) => {
+const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelete }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [imageMousPos, setImageMousePos] = useState({ x: 0, y: 0 });
   const [showMagnifier, setShowMagnifier] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomCenter, setZoomCenter] = useState({ x: 50, y: 50 });
+  const [isDeleting, setIsDeleting] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { isAdmin, getAccessToken } = useAuth();
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -89,6 +93,33 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose }) => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!photo || !isAdmin()) return;
+
+    const confirmed = window.confirm('Are you sure you want to delete this photo? This action cannot be undone.');
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        alert('Failed to get access token. Please try logging in again.');
+        return;
+      }
+
+      await deletePhoto(photo.blobName, token);
+      onClose();
+      if (onDelete) {
+        onDelete();
+      }
+    } catch (error) {
+      console.error('Failed to delete photo:', error);
+      alert('Failed to delete photo. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   const magnifierSize = 220;
@@ -102,6 +133,17 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose }) => {
         <button className="photo-modal-close" onClick={onClose}>
           ×
         </button>
+
+        {isAdmin() && (
+          <button
+            className="photo-modal-delete"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            title="Delete photo"
+          >
+            {isDeleting ? '...' : '🗑️'}
+          </button>
+        )}
 
         <div className="photo-modal-content">
           <div

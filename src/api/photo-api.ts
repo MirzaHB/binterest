@@ -63,3 +63,7 @@ export const getUploadSas = async (): Promise<{ sasUri: string }> => {
   return response.data;
 };
 
+export const deletePhoto = async (blobName: string, accessToken: string): Promise<void> => {
+  const authenticatedClient = createAuthenticatedRequest(accessToken);
+  await authenticatedClient.delete(`/photos/${blobName}`);
+};
