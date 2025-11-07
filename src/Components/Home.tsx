@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import TypewriterEffect from './TypewriterEffect';
+import ScrollNavigation from './ScrollNavigation';
 import './Home.css';
 import './TypewriterEffect.css';
 
 const Home: React.FC = () => {
   return (
     <div className="home-container">
+      <ScrollNavigation />
       <div className="hero-section">
         <div className="hero-content">
           {/* Profile picture - shows on top for mobile */}
@@ -55,7 +57,7 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      <div className="about-section">
+      <div id="about" className="about-section">
         <div className="section-header">
           <h2>About Me</h2>
           <div className="section-line"></div>
@@ -106,7 +108,7 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      <div className="experience-section">
+      <div id="experience" className="experience-section">
         <div className="section-header">
           <h2>Experience</h2>
           <div className="section-line"></div>
@@ -181,7 +183,7 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      <div className="connect-section">
+      <div id="socials" className="connect-section">
         <h3>Let's Connect</h3>
         <p>I'm always open to interesting conversations and new opportunities</p>
         <div className="social-grid">
