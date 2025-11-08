@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { getBlog, getBlogContent, BlogPost as BlogPostType, formatBlogDate, parseTags } from '../../api/blog-api';
+import TableOfContents from './TableOfContents';
 import './BlogPost.css';
 
 const BlogPost: React.FC = () => {
@@ -30,10 +31,13 @@ const BlogPost: React.FC = () => {
       setLoading(true);
       setError(null);
 
+      // Add .md extension back for API calls
+      const blogId = id.endsWith('.md') ? id : `${id}.md`;
+
       // Load blog metadata and content in parallel
       const [blogData, blogContent] = await Promise.all([
-        getBlog(id),
-        getBlogContent(id)
+        getBlog(blogId),
+        getBlogContent(blogId)
       ]);
 
       setBlogPost(blogData);
@@ -74,8 +78,18 @@ const BlogPost: React.FC = () => {
     );
   }
 
+  // Helper function to generate heading IDs - must match TableOfContents.tsx logic
+  const generateHeadingId = (children: any): string => {
+    const text = typeof children === 'string' ? children : children?.toString() || '';
+    // Simple clean ID: "Introduction" -> "introduction"
+    const id = text.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return id;
+  };
+
   return (
     <div className="blog-post-container">
+      <TableOfContents content={content} />
+
       <div className="blog-post-header">
         <button onClick={handleBackClick} className="back-btn">
           ← Back to Blog
@@ -114,13 +128,31 @@ const BlogPost: React.FC = () => {
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
-            // Custom components for better styling
-            h1: ({children}) => <h1 className="markdown-h1">{children}</h1>,
-            h2: ({children}) => <h2 className="markdown-h2">{children}</h2>,
-            h3: ({children}) => <h3 className="markdown-h3">{children}</h3>,
-            h4: ({children}) => <h4 className="markdown-h4">{children}</h4>,
-            h5: ({children}) => <h5 className="markdown-h5">{children}</h5>,
-            h6: ({children}) => <h6 className="markdown-h6">{children}</h6>,
+            // Custom components for better styling with IDs for navigation
+            h1: ({children}) => {
+              const id = generateHeadingId(children);
+              return <h1 id={id} className="markdown-h1">{children}</h1>;
+            },
+            h2: ({children}) => {
+              const id = generateHeadingId(children);
+              return <h2 id={id} className="markdown-h2">{children}</h2>;
+            },
+            h3: ({children}) => {
+              const id = generateHeadingId(children);
+              return <h3 id={id} className="markdown-h3">{children}</h3>;
+            },
+            h4: ({children}) => {
+              const id = generateHeadingId(children);
+              return <h4 id={id} className="markdown-h4">{children}</h4>;
+            },
+            h5: ({children}) => {
+              const id = generateHeadingId(children);
+              return <h5 id={id} className="markdown-h5">{children}</h5>;
+            },
+            h6: ({children}) => {
+              const id = generateHeadingId(children);
+              return <h6 id={id} className="markdown-h6">{children}</h6>;
+            },
             p: ({children}) => <p className="markdown-p">{children}</p>,
             code: ({children, className}) => {
               const isInline = !className;

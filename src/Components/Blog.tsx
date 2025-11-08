@@ -85,7 +85,7 @@ const Blog: React.FC = () => {
       {featuredPost && (
         <div className="featured-section">
           <h2 className="section-title">Featured Post</h2>
-          <article className="featured-post">
+          <article className="featured-post" onClick={() => navigate(`/blog/${featuredPost.id.replace('.md', '')}`)}>
             <div className="post-content">
               <div className="post-meta">
                 <span className="post-date">{formatBlogDate(featuredPost.lastModified || featuredPost.createdDate)}</span>
@@ -99,16 +99,6 @@ const Blog: React.FC = () => {
                   <span key={tag} className="post-tag">{tag}</span>
                 ))}
               </div>
-              <button className="read-more-btn" onClick={() => navigate(`/blog/${featuredPost.id}`)}>
-                <span>Read Full Post</span>
-                <span className="btn-icon">→</span>
-              </button>
-            </div>
-            <div className="post-image">
-              <div className="image-placeholder">
-                <span className="placeholder-icon">📝</span>
-                <p>Featured post image</p>
-              </div>
             </div>
           </article>
         </div>
@@ -118,12 +108,7 @@ const Blog: React.FC = () => {
         <h2 className="section-title">Recent Posts</h2>
         <div className="posts-grid">
           {regularPosts.map(post => (
-            <article key={post.id} className="blog-post" onClick={() => navigate(`/blog/${post.id}`)}>
-              <div className="post-image-small">
-                <div className="image-placeholder-small">
-                  <span className="placeholder-icon-small">📄</span>
-                </div>
-              </div>
+            <article key={post.id} className="blog-post" onClick={() => navigate(`/blog/${post.id.replace('.md', '')}`)}>
               <div className="post-content-small">
                 <div className="post-meta">
                   <span className="post-date">{formatBlogDate(post.lastModified || post.createdDate)}</span>
