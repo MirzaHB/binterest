@@ -1,5 +1,5 @@
 .blog-post-container {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 2rem 1rem;
   line-height: 1.8;
@@ -16,6 +16,20 @@
   color: #e74c3c;
 }
 
+.blog-post-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
 .back-btn {
   background: #3498db;
   color: white;
@@ -24,12 +38,142 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  margin-bottom: 2rem;
   transition: background-color 0.2s ease;
 }
 
 .back-btn:hover {
   background: #2980b9;
+}
+
+.edit-btn {
+  background: #f39c12;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover:not(:disabled) {
+  background: #e67e22;
+  transform: translateY(-1px);
+}
+
+.edit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delete-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.edit-form-container {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.edit-form h3 {
+  margin: 0 0 1.5rem 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.submit-btn {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: #229954;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.cancel-btn {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #7f8c8d;
+  transform: translateY(-1px);
 }
 
 .blog-post-header {
@@ -70,7 +214,7 @@
 }
 
 .blog-post-summary {
-  font-size: 1.25rem;
+  font-size: 1.55rem;
   color: #5d6d7e;
   font-style: italic;
   margin-bottom: 1.5rem;
@@ -98,7 +242,7 @@
 
 .blog-post-content {
   color: #2c3e50;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   line-height: 1.9;
   font-weight: 500;
 }
@@ -151,7 +295,7 @@
 .markdown-p {
   margin: 1.3rem 0;
   color: #2c3e50;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   line-height: 1.9;
   font-weight: 500;
 }
@@ -190,7 +334,7 @@
   color: #5d6d7e;
   font-style: italic;
   border-radius: 0 4px 4px 0;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   line-height: 1.8;
   font-weight: 500;
 }
@@ -204,7 +348,7 @@
 .markdown-li {
   margin: 0.6rem 0;
   color: #2c3e50;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   line-height: 1.9;
   font-weight: 500;
 }

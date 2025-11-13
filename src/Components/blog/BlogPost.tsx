@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { getBlog, getBlogContent, BlogPost as BlogPostType, formatBlogDate, parseTags } from '../../api/blog-api';
+import { getBlog, getBlogContent, deleteBlog, updateBlog, BlogPost as BlogPostType, formatBlogDate, parseTags } from '../../api/blog-api';
+import { useAuth } from '../../auth/useAuth';
 import TableOfContents from './TableOfContents';
 import './BlogPost.css';
 
@@ -13,6 +14,10 @@ const BlogPost: React.FC = () => {
   const [content, setContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState({ title: '', summary: '', author: '', tags: '' });
+  const { isAdmin, getAccessToken } = useAuth();
 
   useEffect(() => {
     if (!id) {
@@ -42,6 +47,13 @@ const BlogPost: React.FC = () => {
 
       setBlogPost(blogData);
       setContent(blogContent);
+      // Populate edit form with current data
+      setEditFormData({
+        title: blogData.title || '',
+        summary: blogData.summary || '',
+        author: blogData.author || '',
+        tags: blogData.tags || '',
+      });
     } catch (err) {
       console.error('Failed to load blog post:', err);
       setError('Failed to load blog post. Please try again later.');
@@ -52,6 +64,55 @@ const BlogPost: React.FC = () => {
 
   const handleBackClick = () => {
     navigate('/blog');
+  };
+
+  const handleDelete = async () => {
+    if (!id || !isAdmin()) return;
+
+    const confirmed = window.confirm('Are you sure you want to delete this blog post? This action cannot be undone.');
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        alert('Failed to get access token. Please try logging in again.');
+        return;
+      }
+
+      const blogId = id.endsWith('.md') ? id : `${id}.md`;
+      await deleteBlog(blogId, token);
+      alert('Blog post deleted successfully!');
+      navigate('/blog');
+    } catch (error) {
+      console.error('Failed to delete blog post:', error);
+      alert('Failed to delete blog post. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !isAdmin()) return;
+
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        alert('Failed to get access token. Please try logging in again.');
+        return;
+      }
+
+      const blogId = id.endsWith('.md') ? id : `${id}.md`;
+      await updateBlog(blogId, editFormData, token);
+      alert('Blog post updated successfully!');
+      setIsEditing(false);
+      // Reload the blog post to show updated data
+      loadBlogPost();
+    } catch (error) {
+      console.error('Failed to update blog post:', error);
+      alert('Failed to update blog post. Please try again.');
+    }
   };
 
   if (loading) {
@@ -91,9 +152,82 @@ const BlogPost: React.FC = () => {
       <TableOfContents content={content} />
 
       <div className="blog-post-header">
-        <button onClick={handleBackClick} className="back-btn">
-          ← Back to Blog
-        </button>
+        <div className="blog-post-actions">
+          <button onClick={handleBackClick} className="back-btn">
+            ← Back to Blog
+          </button>
+
+          {isAdmin() && (
+            <div className="admin-actions">
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="edit-btn"
+                disabled={isDeleting}
+              >
+                {isEditing ? 'Cancel Edit' : '✏️ Edit'}
+              </button>
+              <button
+                onClick={handleDelete}
+                className="delete-btn"
+                disabled={isDeleting || isEditing}
+              >
+                {isDeleting ? 'Deleting...' : '🗑️ Delete'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {isEditing && isAdmin() && (
+          <div className="edit-form-container">
+            <form onSubmit={handleEditSubmit} className="edit-form">
+              <h3>Edit Blog Metadata</h3>
+              <div className="form-group">
+                <label htmlFor="title">Title</label>
+                <input
+                  type="text"
+                  id="title"
+                  value={editFormData.title}
+                  onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                  placeholder="Blog title"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="summary">Summary</label>
+                <textarea
+                  id="summary"
+                  value={editFormData.summary}
+                  onChange={(e) => setEditFormData({ ...editFormData, summary: e.target.value })}
+                  placeholder="Blog summary"
+                  rows={3}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="author">Author</label>
+                <input
+                  type="text"
+                  id="author"
+                  value={editFormData.author}
+                  onChange={(e) => setEditFormData({ ...editFormData, author: e.target.value })}
+                  placeholder="Author name"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="tags">Tags</label>
+                <input
+                  type="text"
+                  id="tags"
+                  value={editFormData.tags}
+                  onChange={(e) => setEditFormData({ ...editFormData, tags: e.target.value })}
+                  placeholder="tag1, tag2, tag3"
+                />
+              </div>
+              <div className="form-actions">
+                <button type="submit" className="submit-btn">Save Changes</button>
+                <button type="button" onClick={() => setIsEditing(false)} className="cancel-btn">Cancel</button>
+              </div>
+            </form>
+          </div>
+        )}
 
         <div className="blog-post-meta">
           <h1 className="blog-post-title">{blogPost.title || 'Untitled Post'}</h1>

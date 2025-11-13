@@ -73,7 +73,7 @@ export const createBlog = async (blogData: CreateBlogRequest, accessToken: strin
 };
 
 // Update blog metadata
-export const updateBlog = async (id: string, updateData: UpdateBlogRequest): Promise<{ message: string }> => {
+export const updateBlog = async (id: string, updateData: UpdateBlogRequest, accessToken: string): Promise<{ message: string }> => {
   const formData = new FormData();
 
   if (updateData.title) formData.append('title', updateData.title);
@@ -84,6 +84,7 @@ export const updateBlog = async (id: string, updateData: UpdateBlogRequest): Pro
   const response = await apiClient.put<{ message: string }>(`/blogs/${id}`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${accessToken}`,
     },
   });
 
@@ -91,8 +92,12 @@ export const updateBlog = async (id: string, updateData: UpdateBlogRequest): Pro
 };
 
 // Delete a blog post
-export const deleteBlog = async (id: string): Promise<{ message: string }> => {
-  const response = await apiClient.delete<{ message: string }>(`/blogs/${id}`);
+export const deleteBlog = async (id: string, accessToken: string): Promise<{ message: string }> => {
+  const response = await apiClient.delete<{ message: string }>(`/blogs/${id}`, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 };
 
