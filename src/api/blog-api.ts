@@ -139,3 +139,23 @@ export const calculateReadTime = (content: string): string => {
 export const uploadBlog = async (blogData: CreateBlogRequest, accessToken: string): Promise<CreateBlogResponse> => {
   return createBlog(blogData, accessToken);
 };
+
+// Update blog content (the actual markdown file)
+export const updateBlogContent = async (id: string, content: string, accessToken: string): Promise<{ message: string }> => {
+  const formData = new FormData();
+
+  // Create a markdown file from the content
+  const blob = new Blob([content], { type: 'text/markdown' });
+  const file = new File([blob], `${id}`, { type: 'text/markdown' });
+
+  formData.append('file', file);
+
+  const response = await apiClient.put<{ message: string }>(`/blogs/${id}/content`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${accessToken}`,
+    },
+  });
+
+  return response.data;
+};

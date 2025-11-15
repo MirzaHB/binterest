@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { getBlog, getBlogContent, deleteBlog, updateBlog, BlogPost as BlogPostType, formatBlogDate, parseTags } from '../../api/blog-api';
+import { getBlog, getBlogContent, deleteBlog, updateBlog, updateBlogContent, BlogPost as BlogPostType, formatBlogDate, parseTags } from '../../api/blog-api';
 import { useAuth } from '../../auth/useAuth';
 import TableOfContents from './TableOfContents';
 import './BlogPost.css';
@@ -16,7 +16,9 @@ const BlogPost: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingContent, setIsEditingContent] = useState(false);
   const [editFormData, setEditFormData] = useState({ title: '', summary: '', author: '', tags: '' });
+  const [editContentData, setEditContentData] = useState('');
   const { isAdmin, getAccessToken } = useAuth();
 
   useEffect(() => {
@@ -54,6 +56,7 @@ const BlogPost: React.FC = () => {
         author: blogData.author || '',
         tags: blogData.tags || '',
       });
+      setEditContentData(blogContent);
     } catch (err) {
       console.error('Failed to load blog post:', err);
       setError('Failed to load blog post. Please try again later.');
@@ -115,6 +118,29 @@ const BlogPost: React.FC = () => {
     }
   };
 
+  const handleContentEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !isAdmin()) return;
+
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        alert('Failed to get access token. Please try logging in again.');
+        return;
+      }
+
+      const blogId = id.endsWith('.md') ? id : `${id}.md`;
+      await updateBlogContent(blogId, editContentData, token);
+      alert('Blog content updated successfully!');
+      setIsEditingContent(false);
+      // Reload the blog post to show updated data
+      loadBlogPost();
+    } catch (error) {
+      console.error('Failed to update blog content:', error);
+      alert('Failed to update blog content. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="blog-post-container">
@@ -154,7 +180,7 @@ const BlogPost: React.FC = () => {
       <div className="blog-post-header">
         <div className="blog-post-actions">
           <button onClick={handleBackClick} className="back-btn">
-            ← Back to Blog
+            ←
           </button>
 
           {isAdmin() && (
@@ -162,14 +188,21 @@ const BlogPost: React.FC = () => {
               <button
                 onClick={() => setIsEditing(!isEditing)}
                 className="edit-btn"
-                disabled={isDeleting}
+                disabled={isDeleting || isEditingContent}
               >
-                {isEditing ? 'Cancel Edit' : '✏️ Edit'}
+                {isEditing ? 'Cancel Metadata Edit' : '✏️ Edit Metadata'}
+              </button>
+              <button
+                onClick={() => setIsEditingContent(!isEditingContent)}
+                className="edit-btn"
+                disabled={isDeleting || isEditing}
+              >
+                {isEditingContent ? 'Cancel Content Edit' : '📝 Edit Content'}
               </button>
               <button
                 onClick={handleDelete}
                 className="delete-btn"
-                disabled={isDeleting || isEditing}
+                disabled={isDeleting || isEditing || isEditingContent}
               >
                 {isDeleting ? 'Deleting...' : '🗑️ Delete'}
               </button>
@@ -229,6 +262,29 @@ const BlogPost: React.FC = () => {
           </div>
         )}
 
+        {isEditingContent && isAdmin() && (
+          <div className="edit-form-container">
+            <form onSubmit={handleContentEditSubmit} className="edit-form">
+              <h3>Edit Blog Content</h3>
+              <div className="form-group">
+                <label htmlFor="content">Content (Markdown)</label>
+                <textarea
+                  id="content"
+                  value={editContentData}
+                  onChange={(e) => setEditContentData(e.target.value)}
+                  placeholder="Write your blog content in Markdown..."
+                  rows={25}
+                  style={{ fontFamily: 'monospace', fontSize: '0.95rem' }}
+                />
+              </div>
+              <div className="form-actions">
+                <button type="submit" className="submit-btn">Save Content</button>
+                <button type="button" onClick={() => setIsEditingContent(false)} className="cancel-btn">Cancel</button>
+              </div>
+            </form>
+          </div>
+        )}
+
         <div className="blog-post-meta">
           <h1 className="blog-post-title">{blogPost.title || 'Untitled Post'}</h1>
 
@@ -243,10 +299,6 @@ const BlogPost: React.FC = () => {
               </>
             )}
           </div>
-
-          {blogPost.summary && (
-            <p className="blog-post-summary">{blogPost.summary}</p>
-          )}
 
           {blogPost.tags && (
             <div className="blog-post-tags">
