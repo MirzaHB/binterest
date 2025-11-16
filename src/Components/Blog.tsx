@@ -91,6 +91,12 @@ const Blog: React.FC = () => {
                 <span className="post-date">{formatBlogDate(featuredPost.lastModified || featuredPost.createdDate)}</span>
                 <span className="post-divider">•</span>
                 <span className="post-read-time">{getBlogReadTime(featuredPost)}</span>
+                {featuredPost.photoCount !== undefined && featuredPost.photoCount > 0 && (
+                  <>
+                    <span className="post-divider">•</span>
+                    <span className="post-photos">📸 {featuredPost.photoCount}</span>
+                  </>
+                )}
               </div>
               <h3 className="post-title">{featuredPost.title || 'Untitled Post'}</h3>
               <p className="post-excerpt">{getBlogExcerpt(featuredPost)}</p>
@@ -114,6 +120,12 @@ const Blog: React.FC = () => {
                   <span className="post-date">{formatBlogDate(post.lastModified || post.createdDate)}</span>
                   <span className="post-divider">•</span>
                   <span className="post-read-time">{getBlogReadTime(post)}</span>
+                  {post.photoCount !== undefined && post.photoCount > 0 && (
+                    <>
+                      <span className="post-divider">•</span>
+                      <span className="post-photos">📸 {post.photoCount}</span>
+                    </>
+                  )}
                 </div>
                 <h3 className="post-title-small">{post.title || 'Untitled Post'}</h3>
                 <p className="post-excerpt-small">{getBlogExcerpt(post)}</p>

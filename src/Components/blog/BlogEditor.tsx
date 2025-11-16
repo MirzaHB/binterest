@@ -10,8 +10,66 @@ const BlogEditor: React.FC = () => {
   const [author, setAuthor] = useState('');
   const [tags, setTags] = useState('');
   const [content, setContent] = useState('');
+  const [photo1, setPhoto1] = useState<File | null>(null);
+  const [photo2, setPhoto2] = useState<File | null>(null);
+  const [photo3, setPhoto3] = useState<File | null>(null);
+  const [photo1Preview, setPhoto1Preview] = useState<string | null>(null);
+  const [photo2Preview, setPhoto2Preview] = useState<string | null>(null);
+  const [photo3Preview, setPhoto3Preview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const handlePhotoSelect = (photoNumber: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/svg+xml'];
+      if (!validTypes.includes(selectedFile.type)) {
+        setMessage({ type: 'error', text: 'Invalid photo format. Please use JPG, PNG, GIF, WEBP, BMP, or SVG.' });
+        return;
+      }
+
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (selectedFile.size > maxSize) {
+        setMessage({ type: 'error', text: 'Photo size must be less than 10MB' });
+        return;
+      }
+
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(selectedFile);
+
+      // Set photo and preview based on photo number
+      if (photoNumber === 1) {
+        setPhoto1(selectedFile);
+        setPhoto1Preview(previewUrl);
+      } else if (photoNumber === 2) {
+        setPhoto2(selectedFile);
+        setPhoto2Preview(previewUrl);
+      } else if (photoNumber === 3) {
+        setPhoto3(selectedFile);
+        setPhoto3Preview(previewUrl);
+      }
+
+      setMessage(null);
+    }
+  };
+
+  const removePhoto = (photoNumber: number) => {
+    if (photoNumber === 1) {
+      setPhoto1(null);
+      if (photo1Preview) URL.revokeObjectURL(photo1Preview);
+      setPhoto1Preview(null);
+    } else if (photoNumber === 2) {
+      setPhoto2(null);
+      if (photo2Preview) URL.revokeObjectURL(photo2Preview);
+      setPhoto2Preview(null);
+    } else if (photoNumber === 3) {
+      setPhoto3(null);
+      if (photo3Preview) URL.revokeObjectURL(photo3Preview);
+      setPhoto3Preview(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +99,10 @@ const BlogEditor: React.FC = () => {
         title: title.trim(),
         summary: summary.trim(),
         author: author.trim(),
-        tags: tags.trim()
+        tags: tags.trim(),
+        photo1: photo1 || undefined,
+        photo2: photo2 || undefined,
+        photo3: photo3 || undefined,
       }, accessToken);
 
       setMessage({ type: 'success', text: `Blog "${result.title}" published successfully!` });
@@ -52,6 +113,17 @@ const BlogEditor: React.FC = () => {
       setAuthor('');
       setTags('');
       setContent('');
+
+      // Clean up photo previews
+      if (photo1Preview) URL.revokeObjectURL(photo1Preview);
+      if (photo2Preview) URL.revokeObjectURL(photo2Preview);
+      if (photo3Preview) URL.revokeObjectURL(photo3Preview);
+      setPhoto1(null);
+      setPhoto2(null);
+      setPhoto3(null);
+      setPhoto1Preview(null);
+      setPhoto2Preview(null);
+      setPhoto3Preview(null);
 
     } catch (error) {
       console.error('Failed to upload blog:', error);
@@ -72,6 +144,17 @@ const BlogEditor: React.FC = () => {
       setTags('');
       setContent('');
       setMessage(null);
+
+      // Clean up photo previews
+      if (photo1Preview) URL.revokeObjectURL(photo1Preview);
+      if (photo2Preview) URL.revokeObjectURL(photo2Preview);
+      if (photo3Preview) URL.revokeObjectURL(photo3Preview);
+      setPhoto1(null);
+      setPhoto2(null);
+      setPhoto3(null);
+      setPhoto1Preview(null);
+      setPhoto2Preview(null);
+      setPhoto3Preview(null);
     }
   };
 
@@ -148,6 +231,54 @@ const BlogEditor: React.FC = () => {
               maxLength={200}
             />
             <span className="char-count">{tags.length}/200</span>
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group full-width">
+            <label>Blog Photos (Optional - Max 3)</label>
+            <div className="photos-upload-section">
+              {[1, 2, 3].map((num) => {
+                const photo = num === 1 ? photo1 : num === 2 ? photo2 : photo3;
+                const preview = num === 1 ? photo1Preview : num === 2 ? photo2Preview : photo3Preview;
+
+                return (
+                  <div key={num} className="photo-upload-item">
+                    <label htmlFor={`photo-${num}`} className="photo-upload-label">
+                      {preview ? (
+                        <div className="photo-preview">
+                          <img src={preview} alt={`Photo ${num} preview`} />
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              removePhoto(num);
+                            }}
+                            className="remove-photo-btn"
+                            title="Remove photo"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="photo-placeholder">
+                          <span className="photo-icon">🖼️</span>
+                          <span className="photo-text">Photo {num}</span>
+                          <span className="photo-hint">Max 10MB</span>
+                        </div>
+                      )}
+                    </label>
+                    <input
+                      type="file"
+                      id={`photo-${num}`}
+                      onChange={handlePhotoSelect(num)}
+                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml"
+                      style={{ display: 'none' }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 

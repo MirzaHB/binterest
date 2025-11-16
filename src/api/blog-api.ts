@@ -10,6 +10,8 @@ export interface BlogPost {
   blobName: string;
   lastModified?: string;
   createdDate?: string;
+  photoCount?: number;
+  photoUrls?: string[];
 }
 
 export interface CreateBlogRequest {
@@ -18,6 +20,9 @@ export interface CreateBlogRequest {
   summary?: string;
   author?: string;
   tags?: string;
+  photo1?: File;
+  photo2?: File;
+  photo3?: File;
 }
 
 export interface CreateBlogResponse {
@@ -61,6 +66,11 @@ export const createBlog = async (blogData: CreateBlogRequest, accessToken: strin
   if (blogData.summary) formData.append('summary', blogData.summary);
   if (blogData.author) formData.append('author', blogData.author);
   if (blogData.tags) formData.append('tags', blogData.tags);
+
+  // Add photos if provided
+  if (blogData.photo1) formData.append('photo1', blogData.photo1);
+  if (blogData.photo2) formData.append('photo2', blogData.photo2);
+  if (blogData.photo3) formData.append('photo3', blogData.photo3);
 
   const response = await apiClient.post<CreateBlogResponse>('/blogs', formData, {
     headers: {
@@ -153,6 +163,40 @@ export const updateBlogContent = async (id: string, content: string, accessToken
   const response = await apiClient.put<{ message: string }>(`/blogs/${id}/content`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${accessToken}`,
+    },
+  });
+
+  return response.data;
+};
+
+// Upload or replace a specific blog photo
+export const uploadBlogPhoto = async (id: string, photoNumber: number, photo: File, accessToken: string): Promise<{ message: string }> => {
+  if (photoNumber < 1 || photoNumber > 3) {
+    throw new Error('Photo number must be 1, 2, or 3');
+  }
+
+  const formData = new FormData();
+  formData.append('photo', photo);
+
+  const response = await apiClient.put<{ message: string }>(`/blogs/${id}/photos/${photoNumber}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${accessToken}`,
+    },
+  });
+
+  return response.data;
+};
+
+// Delete a specific blog photo
+export const deleteBlogPhoto = async (id: string, photoNumber: number, accessToken: string): Promise<{ message: string }> => {
+  if (photoNumber < 1 || photoNumber > 3) {
+    throw new Error('Photo number must be 1, 2, or 3');
+  }
+
+  const response = await apiClient.delete<{ message: string }>(`/blogs/${id}/photos/${photoNumber}`, {
+    headers: {
       'Authorization': `Bearer ${accessToken}`,
     },
   });

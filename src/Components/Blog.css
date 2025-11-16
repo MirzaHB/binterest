@@ -120,6 +120,12 @@
   opacity: 0.8;
 }
 
+.post-photos {
+  opacity: 0.8;
+  font-weight: 500;
+  color: #667eea;
+}
+
 .post-title {
   font-size: 2rem;
   font-weight: 700;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { getBlog, getBlogContent, deleteBlog, updateBlog, updateBlogContent, BlogPost as BlogPostType, formatBlogDate, parseTags } from '../../api/blog-api';
+import { getBlog, getBlogContent, deleteBlog, updateBlog, updateBlogContent, uploadBlogPhoto, deleteBlogPhoto, BlogPost as BlogPostType, formatBlogDate, parseTags } from '../../api/blog-api';
 import { useAuth } from '../../auth/useAuth';
 import TableOfContents from './TableOfContents';
 import './BlogPost.css';
@@ -19,6 +19,9 @@ const BlogPost: React.FC = () => {
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [editFormData, setEditFormData] = useState({ title: '', summary: '', author: '', tags: '' });
   const [editContentData, setEditContentData] = useState('');
+  const [isManagingPhotos, setIsManagingPhotos] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState<number | null>(null);
+  const [deletingPhoto, setDeletingPhoto] = useState<number | null>(null);
   const { isAdmin, getAccessToken } = useAuth();
 
   useEffect(() => {
@@ -141,6 +144,71 @@ const BlogPost: React.FC = () => {
     }
   };
 
+  const handlePhotoUpload = async (photoNumber: number, file: File) => {
+    if (!id || !isAdmin()) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/svg+xml'];
+    if (!validTypes.includes(file.type)) {
+      alert('Invalid photo format. Please use JPG, PNG, GIF, WEBP, BMP, or SVG.');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert('Photo size must be less than 10MB');
+      return;
+    }
+
+    setUploadingPhoto(photoNumber);
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        alert('Failed to get access token. Please try logging in again.');
+        return;
+      }
+
+      const blogId = id.endsWith('.md') ? id : `${id}.md`;
+      await uploadBlogPhoto(blogId, photoNumber, file, token);
+      alert(`Photo ${photoNumber} uploaded successfully!`);
+      // Reload the blog post to show updated photos
+      loadBlogPost();
+    } catch (error) {
+      console.error('Failed to upload photo:', error);
+      alert('Failed to upload photo. Please try again.');
+    } finally {
+      setUploadingPhoto(null);
+    }
+  };
+
+  const handlePhotoDelete = async (photoNumber: number) => {
+    if (!id || !isAdmin()) return;
+
+    const confirmed = window.confirm(`Are you sure you want to delete photo ${photoNumber}?`);
+    if (!confirmed) return;
+
+    setDeletingPhoto(photoNumber);
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        alert('Failed to get access token. Please try logging in again.');
+        return;
+      }
+
+      const blogId = id.endsWith('.md') ? id : `${id}.md`;
+      await deleteBlogPhoto(blogId, photoNumber, token);
+      alert(`Photo ${photoNumber} deleted successfully!`);
+      // Reload the blog post to show updated photos
+      loadBlogPost();
+    } catch (error) {
+      console.error('Failed to delete photo:', error);
+      alert('Failed to delete photo. Please try again.');
+    } finally {
+      setDeletingPhoto(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="blog-post-container">
@@ -188,21 +256,28 @@ const BlogPost: React.FC = () => {
               <button
                 onClick={() => setIsEditing(!isEditing)}
                 className="edit-btn"
-                disabled={isDeleting || isEditingContent}
+                disabled={isDeleting || isEditingContent || isManagingPhotos}
               >
                 {isEditing ? 'Cancel Metadata Edit' : '✏️ Edit Metadata'}
               </button>
               <button
                 onClick={() => setIsEditingContent(!isEditingContent)}
                 className="edit-btn"
-                disabled={isDeleting || isEditing}
+                disabled={isDeleting || isEditing || isManagingPhotos}
               >
                 {isEditingContent ? 'Cancel Content Edit' : '📝 Edit Content'}
               </button>
               <button
+                onClick={() => setIsManagingPhotos(!isManagingPhotos)}
+                className="edit-btn"
+                disabled={isDeleting || isEditing || isEditingContent}
+              >
+                {isManagingPhotos ? 'Close Photos' : '📸 Manage Photos'}
+              </button>
+              <button
                 onClick={handleDelete}
                 className="delete-btn"
-                disabled={isDeleting || isEditing || isEditingContent}
+                disabled={isDeleting || isEditing || isEditingContent || isManagingPhotos}
               >
                 {isDeleting ? 'Deleting...' : '🗑️ Delete'}
               </button>
@@ -308,6 +383,96 @@ const BlogPost: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Admin Photo Management */}
+        {isAdmin() && isManagingPhotos && (
+          <div className="admin-photo-management">
+            <h3 className="photo-management-title">Manage Blog Photos</h3>
+            <p className="photo-management-info">
+              Upload photos here, then copy their URLs to embed them anywhere in your blog content using markdown: <code>![Description](URL)</code>
+            </p>
+            <div className="photo-management-grid">
+              {[1, 2, 3].map((num) => {
+                const existingPhotoUrl = blogPost.photoUrls && blogPost.photoUrls[num - 1];
+                const isUploading = uploadingPhoto === num;
+                const isDeleting = deletingPhoto === num;
+
+                return (
+                  <div key={num} className="photo-management-item">
+                    <div className="photo-management-header">
+                      <span className="photo-number">Photo {num}</span>
+                    </div>
+
+                    {existingPhotoUrl ? (
+                      <div className="existing-photo-container">
+                        <img src={existingPhotoUrl} alt={`Photo ${num}`} className="existing-photo" />
+                        <div className="photo-url-container">
+                          <label className="photo-url-label">Click to copy URL:</label>
+                          <input
+                            type="text"
+                            value={existingPhotoUrl}
+                            readOnly
+                            className="photo-url-input"
+                            onClick={(e) => {
+                              e.currentTarget.select();
+                              navigator.clipboard.writeText(existingPhotoUrl);
+                              alert('URL copied to clipboard!');
+                            }}
+                            title="Click to copy URL"
+                          />
+                        </div>
+                        <div className="photo-actions">
+                          <label className="replace-photo-btn">
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handlePhotoUpload(num, file);
+                              }}
+                              disabled={isUploading || isDeleting}
+                              style={{ display: 'none' }}
+                            />
+                            {isUploading ? 'Uploading...' : '🔄 Replace'}
+                          </label>
+                          <button
+                            onClick={() => handlePhotoDelete(num)}
+                            className="delete-photo-btn-small"
+                            disabled={isUploading || isDeleting}
+                          >
+                            {isDeleting ? 'Deleting...' : '🗑️ Delete'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="upload-photo-container">
+                        <label className="upload-photo-btn">
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handlePhotoUpload(num, file);
+                            }}
+                            disabled={isUploading}
+                            style={{ display: 'none' }}
+                          />
+                          <div className="upload-placeholder">
+                            <span className="upload-icon">📸</span>
+                            <span className="upload-text">
+                              {isUploading ? 'Uploading...' : 'Upload Photo'}
+                            </span>
+                            <span className="upload-hint">Max 10MB</span>
+                          </div>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="blog-post-content">

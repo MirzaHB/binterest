@@ -399,6 +399,238 @@
   color: #34495e;
 }
 
+/* Blog Photos Section */
+.blog-photos-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.blog-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.blog-photo-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.blog-photo-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.blog-photo {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Admin Photo Management */
+.admin-photo-management {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  border-radius: 12px;
+  border: 2px dashed rgba(102, 126, 234, 0.3);
+}
+
+.photo-management-title {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.photo-management-info {
+  margin: 0 0 1.5rem 0;
+  padding: 1rem;
+  background: rgba(102, 126, 234, 0.08);
+  border-left: 3px solid #667eea;
+  border-radius: 4px;
+  color: #2c3e50;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.photo-management-info code {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  color: #667eea;
+}
+
+.photo-management-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.photo-management-item {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.photo-management-header {
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.photo-number {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9rem;
+}
+
+.existing-photo-container {
+  position: relative;
+}
+
+.existing-photo {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-url-container {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.photo-url-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.photo-url-input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  font-family: 'Courier New', monospace;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.photo-url-input:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.photo-url-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.photo-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: white;
+}
+
+.replace-photo-btn,
+.delete-photo-btn-small {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.replace-photo-btn {
+  background: #3498db;
+  color: white;
+}
+
+.replace-photo-btn:hover:not(:disabled) {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.delete-photo-btn-small {
+  background: #e74c3c;
+  color: white;
+}
+
+.delete-photo-btn-small:hover:not(:disabled) {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.replace-photo-btn:disabled,
+.delete-photo-btn-small:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.upload-photo-container {
+  height: 200px;
+}
+
+.upload-photo-btn {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 0.75rem;
+  background: #f8f9fa;
+  transition: background 0.3s ease;
+}
+
+.upload-placeholder:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  opacity: 0.6;
+}
+
+.upload-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.upload-hint {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .blog-post-container {
@@ -443,5 +675,17 @@
   .markdown-th,
   .markdown-td {
     padding: 0.6rem 0.8rem;
+  }
+
+  .blog-photos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .photo-management-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-photo-management {
+    padding: 1.5rem;
   }
 }
