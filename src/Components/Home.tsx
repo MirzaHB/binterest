@@ -43,8 +43,8 @@ const Home: React.FC = () => {
               Explore Gallery
             </Link>
             <Link to="/blog" className="action-button secondary">
-              <span className="button-icon">✍️</span>
-              Read Stories
+              <span className="button-icon">📚</span>
+              Read Blogs
             </Link>
           </div>
         </div>

@@ -365,7 +365,7 @@ const BlogPost: React.FC = () => {
 
           <div className="blog-post-info">
             <span className="blog-post-date">
-              {formatBlogDate(blogPost.lastModified || blogPost.createdDate)}
+              {formatBlogDate(blogPost.createdDate || blogPost.lastModified)}
             </span>
             {blogPost.author && (
               <>

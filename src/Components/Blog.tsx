@@ -88,7 +88,7 @@ const Blog: React.FC = () => {
           <article className="featured-post" onClick={() => navigate(`/blog/${featuredPost.id.replace('.md', '')}`)}>
             <div className="post-content">
               <div className="post-meta">
-                <span className="post-date">{formatBlogDate(featuredPost.lastModified || featuredPost.createdDate)}</span>
+                <span className="post-date">{formatBlogDate(featuredPost.createdDate || featuredPost.lastModified)}</span>
                 <span className="post-divider">•</span>
                 <span className="post-read-time">{getBlogReadTime(featuredPost)}</span>
                 {featuredPost.photoCount !== undefined && featuredPost.photoCount > 0 && (
@@ -117,7 +117,7 @@ const Blog: React.FC = () => {
             <article key={post.id} className="blog-post" onClick={() => navigate(`/blog/${post.id.replace('.md', '')}`)}>
               <div className="post-content-small">
                 <div className="post-meta">
-                  <span className="post-date">{formatBlogDate(post.lastModified || post.createdDate)}</span>
+                  <span className="post-date">{formatBlogDate(post.createdDate || post.lastModified)}</span>
                   <span className="post-divider">•</span>
                   <span className="post-read-time">{getBlogReadTime(post)}</span>
                   {post.photoCount !== undefined && post.photoCount > 0 && (

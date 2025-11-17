@@ -139,7 +139,14 @@ const MusicPlayer: React.FC = () => {
             }}
             title={isPlaying ? 'Pause' : 'Play'}
           >
-            {isPlaying ? '⏸️' : '▶️'}
+            {isPlaying ? (
+              <div className="pause-icon">
+                <span></span>
+                <span></span>
+              </div>
+            ) : (
+              <div className="play-icon"></div>
+            )}
           </button>
         )}
       </div>
@@ -168,7 +175,14 @@ const MusicPlayer: React.FC = () => {
               onClick={togglePlay}
               title={isPlaying ? 'Pause' : 'Play'}
             >
-              {isPlaying ? '⏸️' : '▶️'}
+              {isPlaying ? (
+                <div className="pause-icon">
+                  <span></span>
+                  <span></span>
+                </div>
+              ) : (
+                <div className="play-icon"></div>
+              )}
             </button>
 
             <button
@@ -176,7 +190,10 @@ const MusicPlayer: React.FC = () => {
               onClick={nextTrack}
               title="Next Track"
             >
-              ⏭️
+              <div className="next-icon">
+                <div className="play-icon"></div>
+                <span></span>
+              </div>
             </button>
           </div>
 

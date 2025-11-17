@@ -58,8 +58,16 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
   const scrollToHeading = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      // Use browser's native smooth scroll
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Calculate position with offset to keep title visible
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - 100;
+
+      // Smooth scroll to position
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+
       // Update URL without adding to browser history
       window.history.replaceState(null, '', `#${id}`);
     }
