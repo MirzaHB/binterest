@@ -13,7 +13,7 @@ const PhotoUpload: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
-    const maxSize = 5 * 1024 * 1024; // 10MB
+    const maxSize = 8 * 1024 * 1024; // 8MB
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 
     if (!allowedTypes.includes(file.type)) {
@@ -21,7 +21,7 @@ const PhotoUpload: React.FC = () => {
     }
 
     if (file.size > maxSize) {
-      return 'File size must be less than 5MB';
+      return 'File size must be less than 8MB';
     }
 
     return null;
@@ -124,7 +124,7 @@ const PhotoUpload: React.FC = () => {
             <span className="upload-text">
               {selectedFile ? 'Change Photo' : 'Choose Photo'}
             </span>
-            <span className="upload-hint">JPEG, PNG, WebP, GIF (max 5MB)</span>
+            <span className="upload-hint">JPEG, PNG, WebP, GIF (max 8MB)</span>
           </label>
         </div>
 
