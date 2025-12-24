@@ -38,6 +38,9 @@ const PhotoGallery: React.FC = () => {
   const pendingHeightsRef = useRef<{[key: string]: number}>({});
   const batchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const isRestoringFromCache = useRef(false);
+  const isScrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const pendingRedistribution = useRef(false);
 
   // Calculate optimal column count based on screen width
   const calculateColumnCount = useCallback(() => {
@@ -95,6 +98,38 @@ const PhotoGallery: React.FC = () => {
     return newColumns;
   }, [columnCount]);
 
+  // Scroll detection - disable redistribution during scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      isScrollingRef.current = true;
+
+      // Clear previous timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // Mark scroll as finished after 300ms of no scrolling
+      scrollTimeoutRef.current = setTimeout(() => {
+        isScrollingRef.current = false;
+
+        // If redistribution is pending, do it now
+        if (pendingRedistribution.current) {
+          setColumns(distributePhotosToColumns(photos));
+          pendingRedistribution.current = false;
+        }
+      }, 300);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [photos, distributePhotosToColumns]);
+
   // Handle window resize with debouncing
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -118,6 +153,14 @@ const PhotoGallery: React.FC = () => {
       clearTimeout(timeoutId);
     };
   }, [calculateColumnCount, columnCount]);
+
+  // Redistribute when photos or column count changes
+  useEffect(() => {
+    if (photos.length > 0) {
+      const newColumns = distributePhotosToColumns(photos);
+      setColumns(newColumns);
+    }
+  }, [photos, distributePhotosToColumns]);
 
   // Initialize columns immediately when component mounts
   useEffect(() => {
@@ -199,7 +242,7 @@ const PhotoGallery: React.FC = () => {
         clearTimeout(batchTimeoutRef.current);
       }
 
-      // Batch state update - wait for 100ms of no new images
+      // Batch state update - wait for 250ms of no new images (increased from 100ms)
       batchTimeoutRef.current = setTimeout(() => {
         // Single state update for all pending images
         setImageHeights(prev => {
@@ -209,9 +252,14 @@ const PhotoGallery: React.FC = () => {
           return updated;
         });
 
-        // Single redistribution after batch
-        setColumns(distributePhotosToColumns(photos));
-      }, 100); // Shorter timeout since we're batching
+        // Only redistribute if NOT scrolling
+        if (!isScrollingRef.current) {
+          setColumns(distributePhotosToColumns(photos));
+        } else {
+          // Mark as pending for when scroll finishes
+          pendingRedistribution.current = true;
+        }
+      }, 250); // Increased timeout to accumulate more images
     }
   }, [photos, distributePhotosToColumns]);
 
@@ -223,6 +271,9 @@ const PhotoGallery: React.FC = () => {
       }
       if (batchTimeoutRef.current) {
         clearTimeout(batchTimeoutRef.current);
+      }
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
       }
     };
   }, []);
