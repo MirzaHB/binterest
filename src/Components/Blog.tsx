@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBlogs, BlogPost, parseTags, formatBlogDate, calculateReadTime } from '../api/blog-api';
+import { getBlogs, BlogPost, parseTags, formatBlogDate } from '../api/blog-api';
 import './Blog.css';
 
 const Blog: React.FC = () => {
@@ -34,13 +34,6 @@ const Blog: React.FC = () => {
 
   const getBlogTags = (blog: BlogPost): string[] => {
     return parseTags(blog.tags);
-  };
-
-  const getBlogReadTime = (blog: BlogPost): string => {
-    // For now, we'll estimate based on summary length or use a default
-    // Later you could fetch the actual content and calculate properly
-    const content = blog.summary || '';
-    return content.length > 0 ? calculateReadTime(content) : '5 min read';
   };
 
   // Use the first blog post as featured
@@ -89,8 +82,6 @@ const Blog: React.FC = () => {
             <div className="post-content">
               <div className="post-meta">
                 <span className="post-date">{formatBlogDate(featuredPost.createdDate || featuredPost.lastModified)}</span>
-                <span className="post-divider">•</span>
-                <span className="post-read-time">{getBlogReadTime(featuredPost)}</span>
                 {featuredPost.photoCount !== undefined && featuredPost.photoCount > 0 && (
                   <>
                     <span className="post-divider">•</span>
@@ -118,8 +109,6 @@ const Blog: React.FC = () => {
               <div className="post-content-small">
                 <div className="post-meta">
                   <span className="post-date">{formatBlogDate(post.createdDate || post.lastModified)}</span>
-                  <span className="post-divider">•</span>
-                  <span className="post-read-time">{getBlogReadTime(post)}</span>
                   {post.photoCount !== undefined && post.photoCount > 0 && (
                     <>
                       <span className="post-divider">•</span>

@@ -2,7 +2,16 @@
   "routes": [
     {
       "route": "/api/*",
-      "rewrite": "https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api/"
+      "rewrite": "https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api/",
+      "headers": {
+        "Cache-Control": "no-cache"
+      }
+    },
+    {
+      "route": "/*.{jpg,jpeg,png,gif,webp,svg,ico}",
+      "headers": {
+        "Cache-Control": "public, max-age=3600"
+      }
     },
     {
       "route": "/*",
@@ -18,7 +27,7 @@
     ".json": "application/json"
   },
   "globalHeaders": {
-    "Cache-Control": "no-cache"
+    "Cache-Control": "public, max-age=300"
   },
   "responseOverrides": {
     "401": {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { getPhotos, PhotoMetadata } from '../../api/photo-api';
 import PhotoModal from './PhotoModal';
 import './PhotoGallery.css';
@@ -29,8 +29,12 @@ const PhotoGallery: React.FC = () => {
   };
 
   const [columnCount, setColumnCount] = useState(getInitialColumnCount);
+  // imageHeights state is used for sessionStorage persistence (see handleImageLoad and loadAllPhotos)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [imageHeights, setImageHeights] = useState<{[key: string]: number}>({});
+  const imageHeightsRef = useRef<{[key: string]: number}>({});
   const galleryRef = useRef<HTMLDivElement>(null);
+  const redistributeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Calculate optimal column count based on screen width
   const calculateColumnCount = useCallback(() => {
@@ -60,6 +64,7 @@ const PhotoGallery: React.FC = () => {
   }, []);
 
   // Simple, reliable masonry distribution - always shortest column
+  // Uses ref for imageHeights to prevent constant re-memoization
   const distributePhotosToColumns = useCallback((photoList: PhotoMetadata[]) => {
     const cols = columnCount;
     const newColumns: Column[] = Array.from({ length: cols }, () => ({
@@ -79,13 +84,13 @@ const PhotoGallery: React.FC = () => {
       // Add photo to shortest column
       newColumns[shortestColumnIndex].photos.push(photo);
 
-      // Use actual height or reasonable estimate
-      const photoHeight = imageHeights[photo.blobName] || 350;
+      // Use actual height from ref or reasonable estimate
+      const photoHeight = imageHeightsRef.current[photo.blobName] || 350;
       newColumns[shortestColumnIndex].height += photoHeight + 20; // 20px gap
     });
 
     return newColumns;
-  }, [columnCount, imageHeights]);
+  }, [columnCount]);
 
   // Handle window resize with debouncing
   useEffect(() => {
@@ -131,13 +136,33 @@ const PhotoGallery: React.FC = () => {
     setColumnCount(initialCols);
   }, []);
 
-  // Load all photos
+  // Load all photos with sessionStorage caching
   const loadAllPhotos = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Try to restore from sessionStorage first
+      const cachedPhotos = sessionStorage.getItem('photoGallery_photos');
+      const cachedHeights = sessionStorage.getItem('photoGallery_heights');
+
+      if (cachedPhotos && cachedHeights) {
+        const photos = JSON.parse(cachedPhotos);
+        const heights = JSON.parse(cachedHeights);
+
+        setPhotos(photos);
+        setImageHeights(heights);
+        imageHeightsRef.current = heights;
+        setLoading(false);
+        return;
+      }
+
+      // Otherwise fetch from API
       const photoData = await getPhotos(10000, 0);
       setPhotos(photoData);
+
+      // Cache in sessionStorage
+      sessionStorage.setItem('photoGallery_photos', JSON.stringify(photoData));
     } catch (error) {
       console.error('Failed to load photos:', error);
       setError(error instanceof Error ? error.message : 'Failed to load photos');
@@ -146,33 +171,46 @@ const PhotoGallery: React.FC = () => {
     }
   }, []);
 
-  // Handle image load - store actual height and redistribute
+  // Handle image load - store actual height in ref and trigger debounced redistribution
   const handleImageLoad = useCallback((blobName: string, element: HTMLImageElement) => {
     const actualHeight = element.offsetHeight;
 
-    setImageHeights(prev => {
-      if (!prev[blobName]) {
-        return {
+    // Only update if we don't already have this height
+    if (!imageHeightsRef.current[blobName]) {
+      imageHeightsRef.current[blobName] = actualHeight;
+
+      // Update state for persistence (used in sessionStorage)
+      setImageHeights(prev => {
+        const updated = {
           ...prev,
           [blobName]: actualHeight
         };
-      }
-      return prev;
-    });
-  }, []);
 
-  // Redistribute when we have enough real heights
-  useEffect(() => {
-    if (photos.length > 0 && Object.keys(imageHeights).length > 0) {
-      const loadedCount = Object.keys(imageHeights).length;
+        // Save to sessionStorage for persistence across navigation
+        sessionStorage.setItem('photoGallery_heights', JSON.stringify(updated));
 
-      // Redistribute at key milestones
-      if (loadedCount % 10 === 0 || loadedCount === photos.length) {
-        const newColumns = distributePhotosToColumns(photos);
-        setColumns(newColumns);
+        return updated;
+      });
+
+      // Debounce redistribution - wait 300ms after last image loads
+      if (redistributeTimeoutRef.current) {
+        clearTimeout(redistributeTimeoutRef.current);
       }
+
+      redistributeTimeoutRef.current = setTimeout(() => {
+        setColumns(distributePhotosToColumns(photos));
+      }, 300);
     }
-  }, [imageHeights, photos, distributePhotosToColumns]);
+  }, [photos, distributePhotosToColumns]);
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (redistributeTimeoutRef.current) {
+        clearTimeout(redistributeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Photo click handler
   const handlePhotoClick = (photo: PhotoMetadata) => {
@@ -194,6 +232,16 @@ const PhotoGallery: React.FC = () => {
   useEffect(() => {
     loadAllPhotos();
   }, [loadAllPhotos]);
+
+  // Create a Map for O(1) photo index lookup instead of O(n) findIndex
+  // Must be before early returns (React hooks rule)
+  const photoIndexMap = useMemo(() => {
+    const map = new Map<string, number>();
+    photos.forEach((photo, index) => {
+      map.set(photo.blobName, index);
+    });
+    return map;
+  }, [photos]);
 
   if (loading) {
     return <div className="loading">Loading photos…</div>;
@@ -222,8 +270,8 @@ const PhotoGallery: React.FC = () => {
         {columns.map((column, columnIndex) => (
           <div key={columnIndex} className="photo-column">
             {column.photos.map((photo, photoIndex) => {
-              // Calculate global index to determine if photo should load eagerly
-              const globalIndex = photos.findIndex(p => p.blobName === photo.blobName);
+              // O(1) lookup instead of O(n) findIndex
+              const globalIndex = photoIndexMap.get(photo.blobName) ?? 0;
 
               return (
                 <div
@@ -235,6 +283,7 @@ const PhotoGallery: React.FC = () => {
                     src={photo.url}
                     alt={`Gallery item ${photoIndex + 1}`}
                     loading={globalIndex < 8 ? "eager" : "lazy"}
+                    decoding="async"
                     onLoad={(e) => handleImageLoad(photo.blobName, e.currentTarget)}
                     style={{
                       width: '100%',
