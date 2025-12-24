@@ -35,6 +35,9 @@ const PhotoGallery: React.FC = () => {
   const imageHeightsRef = useRef<{[key: string]: number}>({});
   const galleryRef = useRef<HTMLDivElement>(null);
   const redistributeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const pendingHeightsRef = useRef<{[key: string]: number}>({});
+  const batchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const isRestoringFromCache = useRef(false);
 
   // Calculate optimal column count based on screen width
   const calculateColumnCount = useCallback(() => {
@@ -116,14 +119,6 @@ const PhotoGallery: React.FC = () => {
     };
   }, [calculateColumnCount, columnCount]);
 
-  // Redistribute when photos or column count changes
-  useEffect(() => {
-    if (photos.length > 0) {
-      const newColumns = distributePhotosToColumns(photos);
-      setColumns(newColumns);
-    }
-  }, [photos, distributePhotosToColumns]);
-
   // Initialize columns immediately when component mounts
   useEffect(() => {
     // Set initial empty columns based on screen size
@@ -150,10 +145,23 @@ const PhotoGallery: React.FC = () => {
         const photos = JSON.parse(cachedPhotos);
         const heights = JSON.parse(cachedHeights);
 
+        // Set flag to skip onLoad handlers during cache restoration
+        isRestoringFromCache.current = true;
+
         setPhotos(photos);
         setImageHeights(heights);
         imageHeightsRef.current = heights;
+
+        // Redistribute with cached heights
+        setColumns(distributePhotosToColumns(photos));
+
         setLoading(false);
+
+        // Allow time for initial render, then re-enable onLoad handlers
+        setTimeout(() => {
+          isRestoringFromCache.current = false;
+        }, 1000);
+
         return;
       }
 
@@ -163,51 +171,58 @@ const PhotoGallery: React.FC = () => {
 
       // Cache in sessionStorage
       sessionStorage.setItem('photoGallery_photos', JSON.stringify(photoData));
+
+      // Initial redistribution with estimated heights
+      setColumns(distributePhotosToColumns(photoData));
     } catch (error) {
       console.error('Failed to load photos:', error);
       setError(error instanceof Error ? error.message : 'Failed to load photos');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [distributePhotosToColumns]);
 
-  // Handle image load - store actual height in ref and trigger debounced redistribution
+  // Handle image load - store actual height in ref and trigger batched redistribution
   const handleImageLoad = useCallback((blobName: string, element: HTMLImageElement) => {
+    // Skip if restoring from cache
+    if (isRestoringFromCache.current) return;
+
     const actualHeight = element.offsetHeight;
 
     // Only update if we don't already have this height
     if (!imageHeightsRef.current[blobName]) {
       imageHeightsRef.current[blobName] = actualHeight;
+      pendingHeightsRef.current[blobName] = actualHeight;
 
-      // Update state for persistence (used in sessionStorage)
-      setImageHeights(prev => {
-        const updated = {
-          ...prev,
-          [blobName]: actualHeight
-        };
-
-        // Save to sessionStorage for persistence across navigation
-        sessionStorage.setItem('photoGallery_heights', JSON.stringify(updated));
-
-        return updated;
-      });
-
-      // Debounce redistribution - wait 300ms after last image loads
-      if (redistributeTimeoutRef.current) {
-        clearTimeout(redistributeTimeoutRef.current);
+      // Clear existing batch timer
+      if (batchTimeoutRef.current) {
+        clearTimeout(batchTimeoutRef.current);
       }
 
-      redistributeTimeoutRef.current = setTimeout(() => {
+      // Batch state update - wait for 100ms of no new images
+      batchTimeoutRef.current = setTimeout(() => {
+        // Single state update for all pending images
+        setImageHeights(prev => {
+          const updated = { ...prev, ...pendingHeightsRef.current };
+          sessionStorage.setItem('photoGallery_heights', JSON.stringify(updated));
+          pendingHeightsRef.current = {}; // Clear pending
+          return updated;
+        });
+
+        // Single redistribution after batch
         setColumns(distributePhotosToColumns(photos));
-      }, 300);
+      }, 100); // Shorter timeout since we're batching
     }
   }, [photos, distributePhotosToColumns]);
 
-  // Clean up timeout on unmount
+  // Clean up timeouts on unmount
   useEffect(() => {
     return () => {
       if (redistributeTimeoutRef.current) {
         clearTimeout(redistributeTimeoutRef.current);
+      }
+      if (batchTimeoutRef.current) {
+        clearTimeout(batchTimeoutRef.current);
       }
     };
   }, []);
