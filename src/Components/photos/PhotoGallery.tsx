@@ -78,6 +78,27 @@ const PhotoGallery: React.FC = () => {
       height: 0
     }));
 
+    // Calculate actual column width accounting for gaps
+    // Formula: (containerWidth - gap * (columns - 1)) / columns
+    const getColumnWidth = (): number => {
+      if (!galleryRef.current) return 350; // Fallback
+      const containerWidth = galleryRef.current.offsetWidth;
+
+      // Gap must match CSS media queries
+      let gap = 20; // Default
+      if (containerWidth <= 360) {
+        gap = 8;
+      } else if (containerWidth <= 600) {
+        gap = 10;
+      } else if (containerWidth <= 768) {
+        gap = 15;
+      } else if (containerWidth <= 1024) {
+        gap = 18;
+      }
+
+      return (containerWidth - gap * (cols - 1)) / cols;
+    };
+
     // Get column width for aspect ratio calculations
     const getEstimatedHeight = (photo: PhotoMetadata): number => {
       // First priority: actual measured height from ref
@@ -86,8 +107,8 @@ const PhotoGallery: React.FC = () => {
       }
 
       // Second priority: calculate from metadata dimensions
-      if (photo.width && photo.height && galleryRef.current) {
-        const columnWidth = galleryRef.current.offsetWidth / cols - 20; // Subtract gap
+      if (photo.width && photo.height) {
+        const columnWidth = getColumnWidth();
         const aspectRatio = photo.height / photo.width;
         return columnWidth * aspectRatio;
       }
@@ -95,6 +116,19 @@ const PhotoGallery: React.FC = () => {
       // Fallback: reasonable estimate
       return 350;
     };
+
+    // Get responsive gap value
+    const getGap = (): number => {
+      if (!galleryRef.current) return 20;
+      const containerWidth = galleryRef.current.offsetWidth;
+      if (containerWidth <= 360) return 8;
+      if (containerWidth <= 600) return 10;
+      if (containerWidth <= 768) return 15;
+      if (containerWidth <= 1024) return 18;
+      return 20;
+    };
+
+    const gap = getGap();
 
     photoList.forEach((photo) => {
       // Find the shortest column
@@ -110,7 +144,7 @@ const PhotoGallery: React.FC = () => {
 
       // Use best available height estimate
       const photoHeight = getEstimatedHeight(photo);
-      newColumns[shortestColumnIndex].height += photoHeight + 20; // 20px gap
+      newColumns[shortestColumnIndex].height += photoHeight + gap;
     });
 
     return newColumns;
@@ -255,6 +289,10 @@ const PhotoGallery: React.FC = () => {
       imageHeightsRef.current[blobName] = actualHeight;
       pendingHeightsRef.current[blobName] = actualHeight;
 
+      // Find the photo to check if it has metadata
+      const photo = photos.find(p => p.blobName === blobName);
+      const hasMetadata = photo?.width && photo?.height;
+
       // Clear existing batch timer
       if (batchTimeoutRef.current) {
         clearTimeout(batchTimeoutRef.current);
@@ -270,12 +308,16 @@ const PhotoGallery: React.FC = () => {
           return updated;
         });
 
-        // Only redistribute if NOT scrolling
-        if (!isScrollingRef.current) {
-          setColumns(distributePhotosToColumns(photos));
-        } else {
-          // Mark as pending for when scroll finishes
-          pendingRedistribution.current = true;
+        // Only redistribute if photo lacks metadata (old photos without dimensions)
+        // Photos with metadata should already be accurately placed
+        if (!hasMetadata) {
+          // Only redistribute if NOT scrolling
+          if (!isScrollingRef.current) {
+            setColumns(distributePhotosToColumns(photos));
+          } else {
+            // Mark as pending for when scroll finishes
+            pendingRedistribution.current = true;
+          }
         }
       }, 250); // Increased timeout to accumulate more images
     }
