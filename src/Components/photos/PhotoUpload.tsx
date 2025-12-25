@@ -56,6 +56,28 @@ const PhotoUpload: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
+  const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve({
+          width: img.naturalWidth,
+          height: img.naturalHeight
+        });
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Failed to load image'));
+      };
+
+      img.src = url;
+    });
+  };
+
   const handleUpload = async () => {
     if (!selectedFile) return;
 
@@ -70,7 +92,10 @@ const PhotoUpload: React.FC = () => {
         throw new Error('Unable to get access token. Please try logging in again.');
       }
 
-      const response = await uploadPhoto(selectedFile, accessToken);
+      // Get image dimensions
+      const { width, height } = await getImageDimensions(selectedFile);
+
+      const response = await uploadPhoto(selectedFile, accessToken, width, height);
       setStatusMessage(`✅ ${response.message}`);
       setSelectedFile(null);
       setPreviewUrl('');

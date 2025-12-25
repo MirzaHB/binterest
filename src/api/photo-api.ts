@@ -12,11 +12,25 @@ export interface PhotoMetadata {
   description?: string;
   blobName: string;
   lastModified?: string;
+  width?: number;
+  height?: number;
 }
 
-export const uploadPhoto = async (file: File, accessToken: string): Promise<UploadResponse> => {
+export const uploadPhoto = async (
+  file: File,
+  accessToken: string,
+  width?: number,
+  height?: number
+): Promise<UploadResponse> => {
   const formData = new FormData();
   formData.append('file', file);
+
+  if (width !== undefined) {
+    formData.append('width', width.toString());
+  }
+  if (height !== undefined) {
+    formData.append('height', height.toString());
+  }
 
   const authenticatedClient = createAuthenticatedRequest(accessToken);
   const response = await authenticatedClient.post<UploadResponse>('/photos/upload', formData, {
@@ -34,6 +48,8 @@ interface BackendPhotoMetadata {
   description?: string;
   blobName: string;
   lastModified?: string;
+  width?: number;
+  height?: number;
 }
 
 export const getPhotos = async (limit: number = 5, skip: number = 0): Promise<PhotoMetadata[]> => {
@@ -48,7 +64,9 @@ export const getPhotos = async (limit: number = 5, skip: number = 0): Promise<Ph
       proxyUrl: `/api/photos/${photo.blobName}/image`, // Always provide fallback
       description: photo.description,
       blobName: photo.blobName,
-      lastModified: photo.lastModified
+      lastModified: photo.lastModified,
+      width: photo.width,
+      height: photo.height
     }));
 
     return transformedPhotos;

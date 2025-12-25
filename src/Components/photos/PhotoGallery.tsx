@@ -78,6 +78,24 @@ const PhotoGallery: React.FC = () => {
       height: 0
     }));
 
+    // Get column width for aspect ratio calculations
+    const getEstimatedHeight = (photo: PhotoMetadata): number => {
+      // First priority: actual measured height from ref
+      if (imageHeightsRef.current[photo.blobName]) {
+        return imageHeightsRef.current[photo.blobName];
+      }
+
+      // Second priority: calculate from metadata dimensions
+      if (photo.width && photo.height && galleryRef.current) {
+        const columnWidth = galleryRef.current.offsetWidth / cols - 20; // Subtract gap
+        const aspectRatio = photo.height / photo.width;
+        return columnWidth * aspectRatio;
+      }
+
+      // Fallback: reasonable estimate
+      return 350;
+    };
+
     photoList.forEach((photo) => {
       // Find the shortest column
       let shortestColumnIndex = 0;
@@ -90,8 +108,8 @@ const PhotoGallery: React.FC = () => {
       // Add photo to shortest column
       newColumns[shortestColumnIndex].photos.push(photo);
 
-      // Use actual height from ref or reasonable estimate
-      const photoHeight = imageHeightsRef.current[photo.blobName] || 350;
+      // Use best available height estimate
+      const photoHeight = getEstimatedHeight(photo);
       newColumns[shortestColumnIndex].height += photoHeight + 20; // 20px gap
     });
 
@@ -265,15 +283,20 @@ const PhotoGallery: React.FC = () => {
 
   // Clean up timeouts on unmount
   useEffect(() => {
+    // Capture current ref values for cleanup
+    const redistributeTimeout = redistributeTimeoutRef.current;
+    const batchTimeout = batchTimeoutRef.current;
+    const scrollTimeout = scrollTimeoutRef.current;
+
     return () => {
-      if (redistributeTimeoutRef.current) {
-        clearTimeout(redistributeTimeoutRef.current);
+      if (redistributeTimeout) {
+        clearTimeout(redistributeTimeout);
       }
-      if (batchTimeoutRef.current) {
-        clearTimeout(batchTimeoutRef.current);
+      if (batchTimeout) {
+        clearTimeout(batchTimeout);
       }
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
       }
     };
   }, []);
