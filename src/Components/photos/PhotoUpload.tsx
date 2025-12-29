@@ -14,10 +14,10 @@ const PhotoUpload: React.FC = () => {
 
   const validateFile = (file: File): string | null => {
     const maxSize = 8 * 1024 * 1024; // 8MB
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
 
     if (!allowedTypes.includes(file.type)) {
-      return 'Please select a valid image file (JPEG, PNG, WebP, or GIF)';
+      return 'Please select a valid image file (JPEG, PNG, WebP, GIF, or AVIF)';
     }
 
     if (file.size > maxSize) {
@@ -92,8 +92,18 @@ const PhotoUpload: React.FC = () => {
         throw new Error('Unable to get access token. Please try logging in again.');
       }
 
-      // Get image dimensions
-      const { width, height } = await getImageDimensions(selectedFile);
+      // Try to get image dimensions, but don't fail if it doesn't work
+      let width: number | undefined;
+      let height: number | undefined;
+
+      try {
+        const dimensions = await getImageDimensions(selectedFile);
+        width = dimensions.width;
+        height = dimensions.height;
+      } catch (dimensionError) {
+        console.warn('Could not get image dimensions, uploading without them:', dimensionError);
+        // Continue without dimensions
+      }
 
       const response = await uploadPhoto(selectedFile, accessToken, width, height);
       setStatusMessage(`✅ ${response.message}`);
