@@ -26,6 +26,12 @@ const MusicPlayer: React.FC = () => {
     },
     {
       id: '2',
+      title: 'Nice 2 Know Ya Instrumental (Slowed & Reverbed)',
+      artist: 'Sylendanna',
+      file: '/audio/34. Sylendanna - Nice 2 Know Ya Instrumental (Slowed & Reverbed).mp3'
+    },
+    {
+      id: '3',
       title: 'Missing Life',
       artist: 'Background Music',
       file: '/audio/gabriawll, QKReign - Missing Life [NCS Release].mp3'
