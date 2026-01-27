@@ -122,7 +122,7 @@ const Home: React.FC = () => {
               <h3 className="timeline-title">Software Engineer Intern</h3>
               <h4 className="timeline-company">Canadian UAVS</h4>
               <p className="timeline-description">
-                Working on X-band radar systems supporting critical aerospace monitoring operations
+                Engineered features and optimizations for the Sparrowhawk Radar system, a multi-sensor fusion platform that integrates distributed radars with computer vision and predictive modeling to enable autonomous flight planning, built in C#
               </p>
               <div className="timeline-tags">
                 <span className="timeline-tag">C#</span>

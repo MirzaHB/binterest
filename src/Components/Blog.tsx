@@ -71,7 +71,7 @@ const Blog: React.FC = () => {
           My <span className="title-highlight">Blog</span>
         </h1>
         <p className="blog-subtitle">
-          Thoughts on development, photography, and the creative process
+          Thoughts, ideas, and whatever I'm into
         </p>
       </div>
 
