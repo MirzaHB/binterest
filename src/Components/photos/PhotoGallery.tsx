@@ -37,7 +37,9 @@ const PhotoGallery: React.FC = () => {
   const redistributeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const pendingHeightsRef = useRef<{[key: string]: number}>({});
   const batchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-  const isRestoringFromCache = useRef(false);
+  const restoredFromCacheRef = useRef<Set<string>>(new Set());
+  const photosRef = useRef<PhotoMetadata[]>([]);
+  const hasLoadedRef = useRef(false);
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const pendingRedistribution = useRef(false);
@@ -78,28 +80,15 @@ const PhotoGallery: React.FC = () => {
       height: 0
     }));
 
-    // Calculate actual column width accounting for gaps
-    // Formula: (containerWidth - gap * (columns - 1)) / columns
-    const getColumnWidth = (): number => {
-      if (!galleryRef.current) return 350; // Fallback
-      const containerWidth = galleryRef.current.offsetWidth;
+    // Calculate containerWidth, gap, and columnWidth once — reused for every photo in the loop
+    const containerWidth = galleryRef.current ? galleryRef.current.offsetWidth : 1200;
+    let gap = 20;
+    if (containerWidth <= 360) gap = 8;
+    else if (containerWidth <= 600) gap = 10;
+    else if (containerWidth <= 768) gap = 15;
+    else if (containerWidth <= 1024) gap = 18;
+    const columnWidth = (containerWidth - gap * (cols - 1)) / cols;
 
-      // Gap must match CSS media queries
-      let gap = 20; // Default
-      if (containerWidth <= 360) {
-        gap = 8;
-      } else if (containerWidth <= 600) {
-        gap = 10;
-      } else if (containerWidth <= 768) {
-        gap = 15;
-      } else if (containerWidth <= 1024) {
-        gap = 18;
-      }
-
-      return (containerWidth - gap * (cols - 1)) / cols;
-    };
-
-    // Get column width for aspect ratio calculations
     const getEstimatedHeight = (photo: PhotoMetadata): number => {
       // First priority: actual measured height from ref
       if (imageHeightsRef.current[photo.blobName]) {
@@ -108,7 +97,6 @@ const PhotoGallery: React.FC = () => {
 
       // Second priority: calculate from metadata dimensions
       if (photo.width && photo.height) {
-        const columnWidth = getColumnWidth();
         const aspectRatio = photo.height / photo.width;
         return columnWidth * aspectRatio;
       }
@@ -116,19 +104,6 @@ const PhotoGallery: React.FC = () => {
       // Fallback: reasonable estimate
       return 350;
     };
-
-    // Get responsive gap value
-    const getGap = (): number => {
-      if (!galleryRef.current) return 20;
-      const containerWidth = galleryRef.current.offsetWidth;
-      if (containerWidth <= 360) return 8;
-      if (containerWidth <= 600) return 10;
-      if (containerWidth <= 768) return 15;
-      if (containerWidth <= 1024) return 18;
-      return 20;
-    };
-
-    const gap = getGap();
 
     photoList.forEach((photo) => {
       // Find the shortest column
@@ -166,7 +141,7 @@ const PhotoGallery: React.FC = () => {
 
         // If redistribution is pending, do it now
         if (pendingRedistribution.current) {
-          setColumns(distributePhotosToColumns(photos));
+          setColumns(distributePhotosToColumns(photosRef.current));
           pendingRedistribution.current = false;
         }
       }, 300);
@@ -180,7 +155,12 @@ const PhotoGallery: React.FC = () => {
         clearTimeout(scrollTimeoutRef.current);
       }
     };
-  }, [photos, distributePhotosToColumns]);
+  }, [distributePhotosToColumns]);
+
+  // Keep photosRef in sync so callbacks always see the latest photos array
+  useEffect(() => {
+    photosRef.current = photos;
+  }, [photos]);
 
   // Handle window resize with debouncing
   useEffect(() => {
@@ -240,8 +220,8 @@ const PhotoGallery: React.FC = () => {
         const photos = JSON.parse(cachedPhotos);
         const heights = JSON.parse(cachedHeights);
 
-        // Set flag to skip onLoad handlers during cache restoration
-        isRestoringFromCache.current = true;
+        // Mark these blobNames so onLoad handlers skip them (they're already measured)
+        restoredFromCacheRef.current = new Set(photos.map((p: PhotoMetadata) => p.blobName));
 
         setPhotos(photos);
         setImageHeights(heights);
@@ -251,11 +231,6 @@ const PhotoGallery: React.FC = () => {
         setColumns(distributePhotosToColumns(photos));
 
         setLoading(false);
-
-        // Allow time for initial render, then re-enable onLoad handlers
-        setTimeout(() => {
-          isRestoringFromCache.current = false;
-        }, 1000);
 
         return;
       }
@@ -279,8 +254,11 @@ const PhotoGallery: React.FC = () => {
 
   // Handle image load - store actual height in ref and trigger batched redistribution
   const handleImageLoad = useCallback((blobName: string, element: HTMLImageElement) => {
-    // Skip if restoring from cache
-    if (isRestoringFromCache.current) return;
+    // Skip if this image was restored from cache (already has a measured height)
+    if (restoredFromCacheRef.current.has(blobName)) {
+      restoredFromCacheRef.current.delete(blobName);
+      return;
+    }
 
     const actualHeight = element.offsetHeight;
 
@@ -289,8 +267,8 @@ const PhotoGallery: React.FC = () => {
       imageHeightsRef.current[blobName] = actualHeight;
       pendingHeightsRef.current[blobName] = actualHeight;
 
-      // Find the photo to check if it has metadata
-      const photo = photos.find(p => p.blobName === blobName);
+      // Use photosRef to avoid stale closure — photosRef always points to latest photos array
+      const photo = photosRef.current.find(p => p.blobName === blobName);
       const hasMetadata = photo?.width && photo?.height;
 
       // Clear existing batch timer
@@ -298,7 +276,7 @@ const PhotoGallery: React.FC = () => {
         clearTimeout(batchTimeoutRef.current);
       }
 
-      // Batch state update - wait for 250ms of no new images (increased from 100ms)
+      // Batch state update - wait for 250ms of no new images
       batchTimeoutRef.current = setTimeout(() => {
         // Single state update for all pending images
         setImageHeights(prev => {
@@ -313,15 +291,15 @@ const PhotoGallery: React.FC = () => {
         if (!hasMetadata) {
           // Only redistribute if NOT scrolling
           if (!isScrollingRef.current) {
-            setColumns(distributePhotosToColumns(photos));
+            setColumns(distributePhotosToColumns(photosRef.current));
           } else {
             // Mark as pending for when scroll finishes
             pendingRedistribution.current = true;
           }
         }
-      }, 250); // Increased timeout to accumulate more images
+      }, 250);
     }
-  }, [photos, distributePhotosToColumns]);
+  }, [distributePhotosToColumns]);
 
   // Clean up timeouts on unmount
   useEffect(() => {
@@ -359,10 +337,14 @@ const PhotoGallery: React.FC = () => {
     loadAllPhotos();
   };
 
-  // Load photos on mount
+  // Load photos on mount only — hasLoadedRef prevents re-firing when loadAllPhotos
+  // reference changes due to columnCount/distributePhotosToColumns recreating on resize
   useEffect(() => {
-    loadAllPhotos();
-  }, [loadAllPhotos]);
+    if (!hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      loadAllPhotos();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Create a Map for O(1) photo index lookup instead of O(n) findIndex
   // Must be before early returns (React hooks rule)
@@ -421,7 +403,8 @@ const PhotoGallery: React.FC = () => {
                       height: 'auto',
                       display: 'block',
                       borderRadius: '8px',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      aspectRatio: photo.width && photo.height ? `${photo.width}/${photo.height}` : undefined,
                     }}
                   />
                 </div>

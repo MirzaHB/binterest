@@ -43,6 +43,13 @@
   font-size: 1.2rem;
 }
 
+.avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .login-icon {
   font-size: 1.1rem;
 }

@@ -6,7 +6,7 @@ import './AuthDropdown.css';
 const AuthDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, currentUser, instance } = useAuth();
+  const { isAuthenticated, currentUser, instance, profilePhotoUrl } = useAuth();
 
   const handleLogin = async () => {
     try {
@@ -18,6 +18,8 @@ const AuthDropdown: React.FC = () => {
 
   const handleLogout = async () => {
     try {
+      sessionStorage.removeItem('photoGallery_photos');
+      sessionStorage.removeItem('photoGallery_heights');
       await instance.logoutRedirect(logoutRequest);
     } catch (error) {
       console.error('Logout failed:', error);
@@ -45,7 +47,10 @@ const AuthDropdown: React.FC = () => {
       >
         {isAuthenticated ? (
           <div className="user-avatar">
-            <span className="avatar-icon">👤</span>
+            {profilePhotoUrl
+              ? <img src={profilePhotoUrl} alt="Profile" className="avatar-img" />
+              : <span className="avatar-icon">👤</span>
+            }
           </div>
         ) : (
           <span className="login-icon">🔐</span>

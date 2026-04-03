@@ -29,32 +29,34 @@ msalInstance.addEventCallback((event) => {
   }
 });
 
-// Initialize MSAL and handle redirects
+const renderApp = () => {
+  const root = ReactDOM.createRoot(
+    document.getElementById('root') as HTMLElement
+  );
+  root.render(
+    <React.StrictMode>
+      <MsalProvider instance={msalInstance}>
+        <App />
+      </MsalProvider>
+    </React.StrictMode>
+  );
+};
+
+// Initialize MSAL, process any redirect response, then render.
+// Must render AFTER handleRedirectPromise resolves so the account
+// is set before React components first mount.
 msalInstance.initialize().then(() => {
-  // Handle redirect promise
   return msalInstance.handleRedirectPromise();
 }).then((response) => {
-  if (response) {
-    if (response.account) {
-      // Set active account
-      msalInstance.setActiveAccount(response.account);
-    }
+  if (response?.account) {
+    msalInstance.setActiveAccount(response.account);
   }
+  renderApp();
 }).catch((error) => {
   console.error('❌ MSAL initialization or redirect handling failed:', error);
+  // Render anyway so the user isn't stuck on a blank page
+  renderApp();
 });
-
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-
-root.render(
-  <React.StrictMode>
-    <MsalProvider instance={msalInstance}>
-      <App />
-    </MsalProvider>
-  </React.StrictMode>
-);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

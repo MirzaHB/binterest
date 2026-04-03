@@ -7,6 +7,7 @@ export const useAuth = () => {
   const account = useAccount();
   const [userInfo, setUserInfo] = React.useState<any>(null);
   const [isLoadingUserInfo, setIsLoadingUserInfo] = React.useState(false);
+  const [profilePhotoUrl, setProfilePhotoUrl] = React.useState<string | null>(null);
 
 
   // Fix: Ensure active account is set if we have accounts but no active account
@@ -32,6 +33,25 @@ export const useAuth = () => {
       return response.accessToken;
     } catch (error) {
       console.error('Failed to acquire access token:', error);
+      return null;
+    }
+  }, [account, instance]);
+
+  // Fetch Microsoft profile photo via Graph API
+  const getProfilePhoto = React.useCallback(async (): Promise<string | null> => {
+    if (!account) return null;
+    try {
+      const response = await instance.acquireTokenSilent({
+        scopes: ['User.Read'],
+        account,
+      });
+      const graphResponse = await fetch('https://graph.microsoft.com/v1.0/me/photo/$value', {
+        headers: { Authorization: `Bearer ${response.accessToken}` },
+      });
+      if (!graphResponse.ok) return null;
+      const blob = await graphResponse.blob();
+      return URL.createObjectURL(blob);
+    } catch {
       return null;
     }
   }, [account, instance]);
@@ -82,6 +102,15 @@ export const useAuth = () => {
     }
   }, [isAuthenticated, account, isLoadingUserInfo, userInfo, getUserInfoFromAPI]);
 
+  // Fetch profile photo when authenticated
+  React.useEffect(() => {
+    if (isAuthenticated && account && !profilePhotoUrl) {
+      getProfilePhoto().then(url => {
+        if (url) setProfilePhotoUrl(url);
+      });
+    }
+  }, [isAuthenticated, account, profilePhotoUrl, getProfilePhoto]);
+
   const getCurrentUser = () => {
     if (!account) {
       return null;
@@ -113,6 +142,7 @@ export const useAuth = () => {
     currentUser: getCurrentUser(),
     userInfo,
     isLoadingUserInfo,
+    profilePhotoUrl,
     instance,
     isAdmin,
     hasCrudRole,

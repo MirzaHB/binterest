@@ -516,7 +516,10 @@ const BlogPost: React.FC = () => {
             ul: ({children}) => <ul className="markdown-ul">{children}</ul>,
             ol: ({children}) => <ol className="markdown-ol">{children}</ol>,
             li: ({children}) => <li className="markdown-li">{children}</li>,
-            a: ({children, href}) => <a className="markdown-link" href={href} target="_blank" rel="noopener noreferrer">{children}</a>,
+            a: ({children, href}) => {
+              const safe = !href || /^(https?:|mailto:|#|\/)/.test(href);
+              return <a className="markdown-link" href={safe ? href : '#'} target="_blank" rel="noopener noreferrer">{children}</a>;
+            },
             img: ({src, alt}) => <img className="markdown-img" src={src} alt={alt} />,
             table: ({children}) => <table className="markdown-table">{children}</table>,
             th: ({children}) => <th className="markdown-th">{children}</th>,

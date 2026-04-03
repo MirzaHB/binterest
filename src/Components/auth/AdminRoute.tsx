@@ -8,7 +8,7 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children, fallback }) => {
-  const { isAuthenticated, hasCrudRole } = useAuth();
+  const { isAuthenticated, hasCrudRole, isLoadingUserInfo } = useAuth();
 
   if (!isAuthenticated) {
     return (
@@ -25,6 +25,16 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children, fallback }) => {
             </div>
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (isLoadingUserInfo) {
+    return (
+      <div className="protected-route-message">
+        <div className="access-card">
+          <p>Loading…</p>
+        </div>
       </div>
     );
   }
