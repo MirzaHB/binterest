@@ -85,6 +85,15 @@ export const useAuth = () => {
     }
   }, [getAccessToken]);
 
+  // Clear stale state when user logs out (handles bfcache restore after incomplete logout)
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      setUserInfo(null);
+      setIsLoadingUserInfo(false);
+      setProfilePhotoUrl(null);
+    }
+  }, [isAuthenticated]);
+
   // Fetch user info from API when authenticated
   React.useEffect(() => {
     if (isAuthenticated && account && !isLoadingUserInfo && !userInfo) {
@@ -132,9 +141,7 @@ export const useAuth = () => {
   };
 
   const hasCrudRole = (): boolean => {
-    // For backwards compatibility, now just delegates to isAdmin
-    // since backend uses OID-based authorization
-    return isAdmin();
+    return isAuthenticated && isAdmin();
   };
 
   return {
