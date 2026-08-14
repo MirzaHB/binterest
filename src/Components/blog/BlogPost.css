@@ -238,6 +238,8 @@
   gap: 0.5rem;
 }
 
+/* inline-flex centering: these are links, so the global 44px touch target in
+   index.css applies and the text would otherwise sit at the top of the pill */
 .blog-post-tag {
   background: #ecf0f1;
   color: #2c3e50;
@@ -245,6 +247,22 @@
   border-radius: 15px;
   font-size: 0.85rem;
   font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.blog-post-tag:hover {
+  background: rgba(102, 126, 234, 0.15);
+  color: #667eea;
+  transform: translateY(-1px);
+}
+
+.blog-post-tag:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
 }
 
 .blog-post-content {

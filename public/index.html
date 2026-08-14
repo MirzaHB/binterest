@@ -31,6 +31,14 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <!--
+      oneko.js (MIT) - https://github.com/adryd325/oneko.js
+      A cat that chases the cursor. data-cat must be an absolute path: the script
+      defaults to "./oneko.gif", which would resolve against the current route
+      and 404 on nested paths like /blog/:id.
+      Note: oneko exits early when prefers-reduced-motion is set.
+    -->
+    <script src="%PUBLIC_URL%/oneko.js" data-cat="%PUBLIC_URL%/oneko.gif"></script>
+    <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
 

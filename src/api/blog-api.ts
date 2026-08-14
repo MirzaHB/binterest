@@ -117,6 +117,55 @@ export const parseTags = (tagsString?: string): string[] => {
   return tagsString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
 };
 
+export interface TagCount {
+  tag: string;
+  count: number;
+}
+
+// Sort newest first. The API returns blobs in GUID order, so the list must be
+// sorted client-side or posts appear in an arbitrary order.
+export const sortBlogsByDate = (posts: BlogPost[]): BlogPost[] => {
+  const timestamp = (post: BlogPost): number => {
+    const date = post.createdDate || post.lastModified;
+    if (!date) return 0;
+    const parsed = new Date(date).getTime();
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
+  return [...posts].sort((a, b) => timestamp(b) - timestamp(a));
+};
+
+// Count posts per tag, deduping case-insensitively so "Tech" and "tech" stay
+// one entry. The first casing encountered becomes the display label.
+export const getTagCounts = (posts: BlogPost[]): TagCount[] => {
+  const counts = new Map<string, TagCount>();
+
+  posts.forEach(post => {
+    parseTags(post.tags).forEach(tag => {
+      const key = tag.toLowerCase();
+      const existing = counts.get(key);
+      if (existing) {
+        existing.count++;
+      } else {
+        counts.set(key, { tag, count: 1 });
+      }
+    });
+  });
+
+  return Array.from(counts.values()).sort(
+    (a, b) => b.count - a.count || a.tag.localeCompare(b.tag)
+  );
+};
+
+// Filter posts by tag. A null/empty tag returns everything.
+export const filterBlogsByTag = (posts: BlogPost[], tag?: string | null): BlogPost[] => {
+  if (!tag) return posts;
+  const target = tag.toLowerCase();
+  return posts.filter(post =>
+    parseTags(post.tags).some(t => t.toLowerCase() === target)
+  );
+};
+
 // Helper function to format date
 export const formatBlogDate = (dateString?: string): string => {
   if (!dateString) return 'Unknown date';

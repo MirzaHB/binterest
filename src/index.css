@@ -69,6 +69,14 @@ code {
     monospace;
 }
 
+/* oneko.js chases the cursor, so on touch devices it would just sit in a
+   corner with nothing to follow. Hide it where there's no pointer. */
+@media (hover: none), (pointer: coarse) {
+  #oneko {
+    display: none !important;
+  }
+}
+
 /* Mobile responsive typography */
 @media (max-width: 768px) {
   html {

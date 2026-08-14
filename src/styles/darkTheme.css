@@ -363,30 +363,42 @@
 
 .dark-theme .section-title {
   color: var(--text-primary);
+}
+
+.dark-theme .section-heading {
   border-bottom-color: var(--border-color);
 }
 
-.dark-theme .featured-post,
+.dark-theme .section-title-count {
+  color: var(--text-muted);
+}
+
+.dark-theme .clear-filter-btn {
+  background: rgba(102, 126, 234, 0.2);
+  color: #8fa3f5;
+  border-color: rgba(102, 126, 234, 0.35);
+}
+
+.dark-theme .clear-filter-btn:hover {
+  background: rgba(102, 126, 234, 0.3);
+}
+
+.dark-theme .posts-empty {
+  color: var(--text-muted);
+}
+
 .dark-theme .blog-post {
   background: rgba(45, 55, 72, 0.8);
   border-color: var(--border-color);
   box-shadow: 0 10px 30px var(--shadow-color);
 }
 
-.dark-theme .featured-post:hover,
 .dark-theme .blog-post:hover {
+  background: rgba(45, 55, 72, 0.95);
   box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
 }
 
 .dark-theme .post-meta {
-  color: var(--text-muted);
-}
-
-.dark-theme .post-title {
-  color: var(--text-primary);
-}
-
-.dark-theme .post-excerpt {
   color: var(--text-muted);
 }
 
@@ -398,24 +410,21 @@
   color: var(--text-muted);
 }
 
-.dark-theme .post-tag {
+.dark-theme .post-tag-small {
   background: rgba(102, 126, 234, 0.2);
-  color: #667eea;
+  color: #8fa3f5;
   border-color: rgba(102, 126, 234, 0.3);
 }
 
-.dark-theme .image-placeholder {
-  background: rgba(102, 126, 234, 0.2);
-  border-color: rgba(102, 126, 234, 0.4);
+.dark-theme .post-tag-small:hover {
+  background: rgba(102, 126, 234, 0.35);
+  border-color: rgba(102, 126, 234, 0.55);
 }
 
-.dark-theme .image-placeholder:hover {
-  background: rgba(102, 126, 234, 0.3);
-  border-color: rgba(102, 126, 234, 0.6);
-}
-
-.dark-theme .image-placeholder p {
-  color: var(--text-muted);
+.dark-theme .post-tag-small.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-color: transparent;
 }
 
 /* BlogPost dark styles */
@@ -444,6 +453,11 @@
 .dark-theme .blog-post-tag {
   background: rgba(102, 126, 234, 0.2);
   color: var(--text-secondary);
+}
+
+.dark-theme .blog-post-tag:hover {
+  background: rgba(102, 126, 234, 0.35);
+  color: var(--text-primary);
 }
 
 .dark-theme .blog-post-content {

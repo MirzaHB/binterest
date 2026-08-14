@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { getBlog, getBlogContent, deleteBlog, updateBlog, updateBlogContent, uploadBlogPhoto, deleteBlogPhoto, BlogPost as BlogPostType, formatBlogDate, parseTags } from '../../api/blog-api';
@@ -378,7 +378,14 @@ const BlogPost: React.FC = () => {
           {blogPost.tags && (
             <div className="blog-post-tags">
               {parseTags(blogPost.tags).map(tag => (
-                <span key={tag} className="blog-post-tag">{tag}</span>
+                <Link
+                  key={tag}
+                  to={`/blog?tag=${encodeURIComponent(tag)}`}
+                  className="blog-post-tag"
+                  aria-label={`Show posts tagged ${tag}`}
+                >
+                  {tag}
+                </Link>
               ))}
             </div>
           )}
