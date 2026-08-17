@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './Components/layout/Layout';
 import Home from './Components/Home';
+import Projects from './Components/projects/Projects';
 import PhotoUpload from './Components/photos/PhotoUpload';
 import PhotoGallery from './Components/photos/PhotoGallery';
 import Blog from './Components/Blog';
@@ -28,6 +29,7 @@ const App: React.FC = () => {
         <Layout>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/projects" element={<Projects />} />
             <Route path="/photo-upload" element={
               <AdminRoute>
                 <PhotoUpload />

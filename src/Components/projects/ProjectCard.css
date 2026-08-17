@@ -1,0 +1,133 @@
+/* Shared card, used by both the home #projects section and the /projects page.
+   Matches the .about-card visual language: translucent surface, 20px radius,
+   lift on hover. */
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 2.25rem 2rem;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 2px solid rgba(102, 126, 234, 0.1);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.project-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+.project-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.project-card-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.project-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.project-timeframe {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #667eea;
+  white-space: nowrap;
+}
+
+.project-summary {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #4a5568;
+  margin: 0;
+}
+
+.project-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.project-tech-item {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+}
+
+.project-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.project-link {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #667eea;
+  text-decoration: none;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  border: 2px solid rgba(102, 126, 234, 0.25);
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.project-link:hover {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.project-link.primary {
+  color: #ffffff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+}
+
+.project-link.primary:hover {
+  filter: brightness(1.08);
+}
+
+/* Respect users who ask for less motion — the lift is decorative. */
+@media (prefers-reduced-motion: reduce) {
+  .project-card,
+  .project-link {
+    transition: none;
+  }
+
+  .project-card:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .project-card {
+    padding: 1.75rem 1.5rem;
+  }
+
+  .project-title {
+    font-size: 1.3rem;
+  }
+}

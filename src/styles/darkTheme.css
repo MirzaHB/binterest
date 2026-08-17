@@ -748,3 +748,49 @@
     background: rgba(45, 55, 72, 0.98);
   }
 }
+/* Projects */
+.dark-theme .project-card {
+  background: rgba(45, 55, 72, 0.8);
+  border-color: var(--border-color);
+  box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+.dark-theme .project-card:hover {
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.dark-theme .project-title {
+  color: var(--text-secondary);
+}
+
+.dark-theme .project-summary {
+  color: var(--text-muted);
+}
+
+.dark-theme .project-timeframe,
+.dark-theme .project-tech-item,
+.dark-theme .project-link {
+  color: #a3bffa;
+}
+
+.dark-theme .project-tech-item {
+  background: rgba(102, 126, 234, 0.18);
+  border-color: rgba(102, 126, 234, 0.35);
+}
+
+.dark-theme .project-link.primary {
+  color: #ffffff;
+}
+
+.dark-theme .projects-page-title {
+  color: var(--text-primary);
+}
+
+.dark-theme .projects-subtitle {
+  color: var(--text-muted);
+}
+
+.dark-theme .timeline-points li {
+  color: var(--text-muted);
+}

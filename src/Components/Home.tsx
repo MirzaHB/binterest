@@ -2,10 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import TypewriterEffect from './TypewriterEffect';
 import ScrollNavigation from './ScrollNavigation';
+import ProjectCard from './projects/ProjectCard';
+import { getFeaturedProjects, PROJECTS } from '../data/projects';
 import './Home.css';
 import './TypewriterEffect.css';
 
 const Home: React.FC = () => {
+  const featuredProjects = getFeaturedProjects();
+  const hasMoreProjects = PROJECTS.length > featuredProjects.length;
+
   return (
     <div className="home-container">
       <ScrollNavigation />
@@ -120,12 +125,37 @@ const Home: React.FC = () => {
             <div className="timeline-content">
               <span className="timeline-date">May 2025 - Present</span>
               <h3 className="timeline-title">Software Engineer Intern</h3>
-              <h4 className="timeline-company">Canadian UAVS</h4>
+              <h4 className="timeline-company">Canadian UAVs</h4>
               <p className="timeline-description">
-                Engineered features and optimizations for the Sparrowhawk Radar system, a multi-sensor fusion platform that integrates distributed radars with computer vision and predictive modeling to enable autonomous flight planning, built in C#
+                Building the Sparrowhawk Radar system, a multi-sensor fusion platform that combines
+                distributed radars with computer vision and predictive modeling for autonomous
+                flight planning, on a domain-driven design architecture.
               </p>
+              <ul className="timeline-points">
+                <li>
+                  Shipped end-to-end features for the real-time radar monitoring platform in
+                  C#/.NET, Blazor and SignalR, owning work from the database layer to the
+                  operator UI.
+                </li>
+                <li>
+                  Engineered a single-pass streaming aggregation pipeline over 1M+ time-series
+                  records per query, powering interactive dashboards and Leaflet geospatial views
+                  with multi-criteria filtering.
+                </li>
+                <li>
+                  Built a buffered data-loading layer with look-ahead prefetching and overlap
+                  detection, cutting redundant queries and keeping playback smooth across large
+                  historical datasets.
+                </li>
+                <li>
+                  Worked on the core detection and tracking engine, including Kalman filtering.
+                </li>
+              </ul>
               <div className="timeline-tags">
                 <span className="timeline-tag">C#</span>
+                <span className="timeline-tag">Blazor</span>
+                <span className="timeline-tag">SignalR</span>
+                <span className="timeline-tag">Leaflet</span>
                 <span className="timeline-tag">Azure</span>
               </div>
             </div>
@@ -138,12 +168,32 @@ const Home: React.FC = () => {
               <h3 className="timeline-title">Software Engineer Intern</h3>
               <h4 className="timeline-company">Symend</h4>
               <p className="timeline-description">
-                Worked on a platform to manage customer Engagement through behavioural science.
-                Our Platform Managed millions of cutomers for major companies such as American Express, Telus, and BMO.
+                Worked across the full stack of a microservices platform that manages customer
+                engagement through behavioural science, serving millions of customers for major
+                companies such as American Express, Telus, and BMO.
               </p>
+              <ul className="timeline-points">
+                <li>
+                  Built a text editor feature that sends written copy to an AI model and rewrites
+                  it to match a tone selected by the user.
+                </li>
+                <li>
+                  Implemented search and pagination over a large list of items.
+                </li>
+                <li>
+                  Configured scoped and singleton lifetimes in the .NET DI container, improving
+                  testability and separation of concerns across event handlers.
+                </li>
+                <li>
+                  Wrote frontend tests with Playwright and backend tests with TUnit.
+                </li>
+              </ul>
               <div className="timeline-tags">
-                <span className="timeline-tag">Typescript</span>
                 <span className="timeline-tag">C#</span>
+                <span className="timeline-tag">TypeScript</span>
+                <span className="timeline-tag">Docker</span>
+                <span className="timeline-tag">Playwright</span>
+                <span className="timeline-tag">TUnit</span>
               </div>
             </div>
           </div>
@@ -159,7 +209,7 @@ const Home: React.FC = () => {
               </p>
               <div className="timeline-tags">
                 <span className="timeline-tag">Python</span>
-                <span className="timeline-tag">Javascript</span>
+                <span className="timeline-tag">JavaScript</span>
               </div>
             </div>
           </div>
@@ -167,11 +217,11 @@ const Home: React.FC = () => {
           <div className="timeline-item">
             <div className="timeline-dot"></div>
             <div className="timeline-content">
-              <span className="timeline-date">2021 - Present</span>
+              <span className="timeline-date">Graduating April 2027</span>
               <h3 className="timeline-title">Bachelor's Degree</h3>
               <h4 className="timeline-company">University of Calgary</h4>
               <p className="timeline-description">
-                Bachelors of Science in Software Engineering.
+                Bachelor of Science in Software Engineering.
               </p>
               <div className="timeline-tags">
                 <span className="timeline-tag">Networked Systems</span>
@@ -181,6 +231,28 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div id="projects" className="projects-section">
+        <div className="section-header">
+          <h2>Projects</h2>
+          <div className="section-line"></div>
+        </div>
+
+        <div className="featured-projects">
+          {featuredProjects.map(project => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
+        </div>
+
+        {hasMoreProjects && (
+          <div className="projects-cta">
+            <Link to="/projects" className="action-button secondary">
+              View all projects
+              <span className="button-icon" aria-hidden="true">→</span>
+            </Link>
+          </div>
+        )}
       </div>
 
       <div id="socials" className="connect-section">

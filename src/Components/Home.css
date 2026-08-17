@@ -785,3 +785,66 @@
     padding: 2rem 1rem;
   }
 }
+/* Bullet list inside a timeline entry, for roles with several distinct
+   accomplishments that read badly as one prose block. */
+.timeline-points {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.timeline-points li {
+  position: relative;
+  padding-left: 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #4a5568;
+}
+
+.timeline-points li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Projects Section */
+.projects-section {
+  padding: 6rem 0;
+}
+
+/* No max-width or padding here: .home-container already constrains and pads.
+   Adding a second 2rem inset left 1072px of track space, 12px short of the
+   1084px three 340px columns need, which silently collapsed this to 2-up. */
+.featured-projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 2rem;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.projects-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+@media (max-width: 768px) {
+  .projects-section {
+    padding: 4rem 0;
+  }
+
+  /* auto-fit's 340px track would overflow a narrow viewport. */
+  .featured-projects {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}

@@ -60,6 +60,15 @@ const Navigation: React.FC = () => {
           </Link>
 
           <Link
+            to="/projects"
+            className={`nav-link ${isActive('/projects') ? 'active' : ''}`}
+            onClick={closeMobileMenu}
+          >
+            <span className="nav-icon">🛠️</span>
+            Projects
+          </Link>
+
+          <Link
             to="/photos"
             className={`nav-link ${isActive('/photos') ? 'active' : ''}`}
             onClick={closeMobileMenu}

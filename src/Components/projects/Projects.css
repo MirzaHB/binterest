@@ -1,0 +1,58 @@
+/* /projects page. Card styling itself lives in ProjectCard.css. */
+
+.projects-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem 5rem;
+  min-height: calc(100vh - 70px);
+  box-sizing: border-box;
+}
+
+.projects-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.projects-page-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #1a202c;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: -0.02em;
+}
+
+.projects-page-title .title-highlight {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.projects-subtitle {
+  font-size: 1.15rem;
+  color: #4a5568;
+  margin: 0;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 2rem;
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .projects-container {
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .projects-page-title {
+    font-size: 2.25rem;
+  }
+
+  /* Below the grid's 340px track minimum, auto-fit would overflow the viewport. */
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
