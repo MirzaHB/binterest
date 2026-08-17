@@ -53,8 +53,6 @@
   display: block;
   overflow: hidden;
   will-change: transform; /* GPU acceleration hint for smoother rendering */
-  content-visibility: auto; /* Browser skips rendering off-screen items */
-  contain-intrinsic-size: 0 350px; /* Matches fallback height estimate */
 }
 
 .photo-item:not(.loading):not(.error) {
