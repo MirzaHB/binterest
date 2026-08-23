@@ -6,6 +6,13 @@ export interface UploadResponse {
   blobName: string;
 }
 
+// A display-sized copy of a photo, produced by the ProcessPhotoOnUpload Azure
+// function and listed by the API.
+export interface PhotoThumbnail {
+  width: number;
+  url: string;
+}
+
 export interface PhotoMetadata {
   url: string;
   proxyUrl?: string; // Fallback URL if direct URL fails
@@ -14,6 +21,9 @@ export interface PhotoMetadata {
   lastModified?: string;
   width?: number;
   height?: number;
+  // Smallest first. Empty for photos uploaded before the resize function existed,
+  // in which case callers fall back to the full-size url.
+  thumbnails?: PhotoThumbnail[];
 }
 
 export const uploadPhoto = async (
@@ -50,6 +60,7 @@ interface BackendPhotoMetadata {
   lastModified?: string;
   width?: number;
   height?: number;
+  thumbnails?: PhotoThumbnail[];
 }
 
 export const getPhotos = async (limit: number = 5, skip: number = 0): Promise<PhotoMetadata[]> => {
@@ -66,7 +77,8 @@ export const getPhotos = async (limit: number = 5, skip: number = 0): Promise<Ph
       blobName: photo.blobName,
       lastModified: photo.lastModified,
       width: photo.width,
-      height: photo.height
+      height: photo.height,
+      thumbnails: photo.thumbnails
     }));
 
     return transformedPhotos;

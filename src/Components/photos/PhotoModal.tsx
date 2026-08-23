@@ -21,6 +21,43 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
   const containerRef = useRef<HTMLDivElement>(null);
   const { isAdmin, getAccessToken } = useAuth();
 
+  // The grid now renders a 1280px copy, so the full-size original is no longer
+  // in the browser's cache when the modal opens — going straight to it would
+  // leave the modal blank for as long as it takes to pull a megabyte or two down
+  // and spend ~90ms decoding it. Show the copy the grid already has, then swap.
+  const [displayUrl, setDisplayUrl] = useState('');
+
+  useEffect(() => {
+    if (!photo) return;
+
+    const largestThumb = photo.thumbnails?.length
+      ? photo.thumbnails[photo.thumbnails.length - 1].url
+      : null;
+
+    setDisplayUrl(largestThumb ?? photo.url);
+
+    // Nothing to upgrade to for photos that predate the resize function.
+    if (!largestThumb) return;
+
+    let cancelled = false;
+    const full = new Image();
+    full.src = photo.url;
+
+    // decode() resolves only once the pixels are ready to paint, so the swap
+    // never trades a sharp thumbnail for an empty frame. The zoom and magnifier
+    // read whatever is showing, so they sharpen as soon as this lands.
+    full
+      .decode()
+      .catch(() => undefined)
+      .then(() => {
+        if (!cancelled) setDisplayUrl(photo.url);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [photo]);
+
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -156,7 +193,7 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
           >
             <img
               ref={imageRef}
-              src={photo?.url || ''}
+              src={displayUrl}
               alt="Full size photo"
               className={`photo-modal-image ${isZoomed ? 'zoomed' : ''}`}
               style={isZoomed ? {
@@ -176,7 +213,7 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
                   top: `${mousePos.y + magnifierOffset.y}px`,
                   width: `${magnifierSize}px`,
                   height: `${magnifierSize}px`,
-                  backgroundImage: `url(${photo?.url || ''})`,
+                  backgroundImage: `url(${displayUrl})`,
                   backgroundSize: `${imageRef.current.width * zoomLevel}px ${imageRef.current.height * zoomLevel}px`,
                   backgroundPosition: `-${imageMousPos.x * zoomLevel - magnifierSize / 2}px -${imageMousPos.y * zoomLevel - magnifierSize / 2}px`,
                 }}

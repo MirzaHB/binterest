@@ -1,0 +1,74 @@
+/* The button reuses .theme-toggle-nav for shape and colour; these rules only
+   cover the "cat is away" state and the little nudge that appears with it. */
+.cat-toggle.off .nav-icon {
+  opacity: 0.6;
+  filter: grayscale(1);
+}
+
+.cat-toggle-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Hangs directly under the toggle, so "the paw above" points at an actual
+   button the visitor can see. */
+.cat-toast {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  z-index: 1000;
+  /* Without an explicit width this shrink-to-fits against the 44px wrapper and
+     collapses to one word per line. */
+  width: max-content;
+  max-width: min(280px, calc(100vw - 40px));
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  color: #2d3748;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  animation: catToastIn 0.3s ease;
+}
+
+/* Caret pointing back up at the toggle. The button is 44px wide and the toast
+   is right-aligned to it, so 16px centres the 12px caret under the paw. */
+.cat-toast::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 16px;
+  width: 12px;
+  height: 12px;
+  background: inherit;
+  border-left: 1px solid rgba(102, 126, 234, 0.2);
+  border-top: 1px solid rgba(102, 126, 234, 0.2);
+  transform: rotate(45deg);
+}
+
+@keyframes catToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-toast {
+    animation: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .cat-toast {
+    /* The mobile nav is a compact pill, so tuck the toast a little closer. */
+    top: calc(100% + 10px);
+  }
+}

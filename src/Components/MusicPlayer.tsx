@@ -41,7 +41,6 @@ const MusicPlayer: React.FC = () => {
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
-      audioRef.current.loop = true; // Loop the current track
 
       // Sync state with actual audio element
       const audio = audioRef.current;
@@ -102,12 +101,26 @@ const MusicPlayer: React.FC = () => {
     }
   };
 
-  const nextTrack = () => {
+  // Wraps in both directions, so the buttons are never dead ends.
+  const changeTrack = (offset: number) => {
     // Store current playing state before changing tracks
     wasPlayingRef.current = isPlaying;
-    const next = (currentTrack + 1) % tracks.length;
-    setCurrentTrack(next);
+    const count = tracks.length;
+    setCurrentTrack((current) => (current + offset + count) % count);
     // Track change playback is handled in useEffect
+  };
+
+  const nextTrack = () => changeTrack(1);
+
+  const prevTrack = () => {
+    // Standard music-player behaviour: once you're a few seconds into a track,
+    // "previous" means "start this one over" rather than skipping backwards.
+    const audio = audioRef.current;
+    if (audio && audio.currentTime > 3) {
+      audio.currentTime = 0;
+      return;
+    }
+    changeTrack(-1);
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,7 +143,9 @@ const MusicPlayer: React.FC = () => {
         <button
           className="music-toggle-btn"
           onClick={() => setShowPlayer(!showPlayer)}
-          title="Background Music"
+          title={showPlayer ? 'Hide music player' : 'Show music player'}
+          aria-label={showPlayer ? 'Hide music player' : 'Show music player'}
+          aria-expanded={showPlayer}
         >
           🎵
         </button>
@@ -144,6 +159,7 @@ const MusicPlayer: React.FC = () => {
               togglePlay();
             }}
             title={isPlaying ? 'Pause' : 'Play'}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? (
               <div className="pause-icon">
@@ -173,13 +189,29 @@ const MusicPlayer: React.FC = () => {
           <div className="music-info">
             <div className="track-title">{tracks[currentTrack].title}</div>
             <div className="track-artist">{tracks[currentTrack].artist}</div>
+            <div className="track-position">
+              Track {currentTrack + 1} of {tracks.length}
+            </div>
           </div>
 
           <div className="music-controls">
             <button
+              className="music-btn secondary"
+              onClick={prevTrack}
+              title="Previous track"
+              aria-label="Previous track"
+            >
+              <div className="prev-icon">
+                <span></span>
+                <div className="play-icon"></div>
+              </div>
+            </button>
+
+            <button
               className="music-btn"
               onClick={togglePlay}
               title={isPlaying ? 'Pause' : 'Play'}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
             >
               {isPlaying ? (
                 <div className="pause-icon">
@@ -192,9 +224,10 @@ const MusicPlayer: React.FC = () => {
             </button>
 
             <button
-              className="music-btn"
+              className="music-btn secondary"
               onClick={nextTrack}
-              title="Next Track"
+              title="Next track"
+              aria-label="Next track"
             >
               <div className="next-icon">
                 <div className="play-icon"></div>
@@ -204,7 +237,7 @@ const MusicPlayer: React.FC = () => {
           </div>
 
           <div className="volume-control">
-            <span>🔊</span>
+            <span aria-hidden="true">🔊</span>
             <input
               type="range"
               min="0"
@@ -213,6 +246,7 @@ const MusicPlayer: React.FC = () => {
               value={volume}
               onChange={handleVolumeChange}
               className="volume-slider"
+              aria-label="Volume"
             />
           </div>
 

@@ -36,6 +36,8 @@
       defaults to "./oneko.gif", which would resolve against the current route
       and 404 on nested paths like /blog/:id.
       Note: oneko exits early when prefers-reduced-motion is set.
+      Modified to expose window.oneko so the nav's cat toggle (CatToggle.tsx)
+      can send the cat away and call it back; the cat is clickable too.
     -->
     <script src="%PUBLIC_URL%/oneko.js" data-cat="%PUBLIC_URL%/oneko.gif"></script>
     <!--

@@ -70,11 +70,34 @@ code {
 }
 
 /* oneko.js chases the cursor, so on touch devices it would just sit in a
-   corner with nothing to follow. Hide it where there's no pointer. */
+   corner with nothing to follow. Hide it where there's no pointer — and with
+   no cat to toggle, hide its nav button too. */
 @media (hover: none), (pointer: coarse) {
-  #oneko {
+  #oneko,
+  .cat-toggle {
     display: none !important;
   }
+}
+
+/* One-time nudge above the cat, telling people they can click it away.
+   Lives outside React because oneko.js owns the cat's position. */
+.oneko-hint {
+  position: fixed;
+  z-index: 2147483647;
+  transform: translate(-50%, -100%);
+  padding: 0.3rem 0.6rem;
+  border-radius: 10px;
+  background: rgba(45, 55, 72, 0.92);
+  color: #fff;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.oneko-hint.visible {
+  opacity: 1;
 }
 
 /* Mobile responsive typography */

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import AuthDropdown from '../auth/AuthDropdown';
+import CatToggle from './CatToggle';
 import { useAuth } from '../../auth/useAuth';
 import { useTheme } from '../../contexts/ThemeContext';
 import './Navigation.css';
@@ -60,15 +61,6 @@ const Navigation: React.FC = () => {
           </Link>
 
           <Link
-            to="/projects"
-            className={`nav-link ${isActive('/projects') ? 'active' : ''}`}
-            onClick={closeMobileMenu}
-          >
-            <span className="nav-icon">🛠️</span>
-            Projects
-          </Link>
-
-          <Link
             to="/photos"
             className={`nav-link ${isActive('/photos') ? 'active' : ''}`}
             onClick={closeMobileMenu}
@@ -118,6 +110,7 @@ const Navigation: React.FC = () => {
           >
             <span className="nav-icon">{isDarkMode ? '☀️' : '🌙'}</span>
           </button>
+          <CatToggle />
           <AuthDropdown />
 
           {/* Hamburger menu button for mobile - inside nav-actions */}

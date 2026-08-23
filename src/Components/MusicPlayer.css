@@ -144,10 +144,18 @@
   font-size: 0.8rem;
 }
 
+.track-position {
+  color: #8a94a6;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  margin-top: 6px;
+}
+
 .music-controls {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  align-items: center;
+  gap: 12px;
   padding: 0 20px 15px;
 }
 
@@ -169,6 +177,33 @@
 .music-btn:hover {
   transform: scale(1.1);
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.music-btn:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Skip buttons sit either side of play/pause; keeping them smaller and flat
+   makes play/pause read as the primary control. */
+.music-btn.secondary {
+  width: 32px;
+  height: 32px;
+  background: rgba(102, 126, 234, 0.12);
+}
+
+.music-btn.secondary:hover {
+  background: rgba(102, 126, 234, 0.22);
+  box-shadow: none;
+}
+
+.music-btn.secondary .play-icon {
+  border-left-color: #667eea;
+}
+
+.music-btn.secondary .next-icon span,
+.music-btn.secondary .prev-icon span {
+  background: #667eea;
 }
 
 .volume-control {
@@ -292,6 +327,34 @@
 }
 
 .next-icon span {
+  width: 2px;
+  height: 12px;
+  background: white;
+  border-radius: 1px;
+}
+
+/* Same parts as .next-icon, mirrored: bar first, then a left-pointing triangle. */
+.prev-icon {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.prev-icon .play-icon {
+  width: 0;
+  height: 0;
+  border-left: none;
+  border-right: 8px solid white;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  margin-left: 0;
+}
+
+.music-btn.secondary .prev-icon .play-icon {
+  border-right-color: #667eea;
+}
+
+.prev-icon span {
   width: 2px;
   height: 12px;
   background: white;

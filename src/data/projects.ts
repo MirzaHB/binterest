@@ -67,8 +67,8 @@ export const PROJECTS: Project[] = [
       'Blob Storage',
       'Entra ID',
     ],
+    // No liveUrl: the live site is the page you're reading this on.
     timeframe: '2025 - Present',
-    liveUrl: 'https://hassanbaig.ca',
     blogId: '3c53e933-d99e-4feb-b6fe-09488b3223b0',
     featured: true,
   },

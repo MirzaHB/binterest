@@ -312,6 +312,27 @@
   }
 }
 
+/* Cat toggle dark styles */
+/* A greyed paw at light-mode opacity all but vanishes on the dark nav, and the
+   "off" state is exactly when the button has to stay findable. */
+.dark-theme .cat-toggle.off .nav-icon {
+  opacity: 0.9;
+  /* The paw glyph is near-black, so greying it alone leaves it invisible here.
+     Brightness lifts it to a light grey paw that reads against the dark nav. */
+  filter: grayscale(1) brightness(2.4);
+}
+
+.dark-theme .cat-toast {
+  background: rgba(45, 55, 72, 0.95);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-theme .cat-toast::before {
+  border-left-color: var(--border-color);
+  border-top-color: var(--border-color);
+}
+
 /* Music player dark styles */
 .dark-theme .music-player {
   background: rgba(45, 55, 72, 0.95);
@@ -323,8 +344,17 @@
   color: var(--text-primary);
 }
 
-.dark-theme .track-artist {
+.dark-theme .track-artist,
+.dark-theme .track-position {
   color: var(--text-muted);
+}
+
+.dark-theme .music-btn.secondary {
+  background: rgba(102, 126, 234, 0.25);
+}
+
+.dark-theme .music-btn.secondary:hover {
+  background: rgba(102, 126, 234, 0.4);
 }
 
 .dark-theme .music-close-btn {

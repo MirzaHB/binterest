@@ -88,11 +88,97 @@
               0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.nav-item.active .nav-label {
-  opacity: 1;
-  transform: translateX(0);
-  color: #667eea;
-  border-color: rgba(102, 126, 234, 0.3);
+/* The active section's label is the travelling pill, so the in-flow copy would
+   only sit underneath it. It stays in the DOM for screen readers. */
+.nav-item.active .nav-label,
+.nav-item.active:hover .nav-label {
+  opacity: 0;
+}
+
+/* The dot waits out the pill's journey and pops exactly as it lands, so it
+   reads as catching the bubble rather than lighting up on its own. Leaving
+   .active drops the delay, so the dot the pill just left deflates at once. */
+.nav-item.active .nav-dot {
+  transition-delay: 0.42s;
+}
+
+/* Hovering is a direct answer to the pointer and shouldn't wait on anything. */
+.nav-item:hover .nav-dot {
+  transition-delay: 0s;
+}
+
+/* ---- The travelling label ----------------------------------------------
+   Two elements, because they animate on different clocks: .nav-pill owns the
+   vertical trip between dots, .nav-pill-body owns the pop-out and the landing
+   squash. One element can only hold one transform, so they'd overwrite each
+   other. Keep the durations in step with TRIP_MS in ScrollNavigation.tsx. */
+.nav-pill {
+  position: absolute;
+  /* Snug against the active dot, which scales to ~25px and so reaches 22px.
+     Close enough to read as docked into it rather than floating alongside. */
+  left: 30px;
+  top: 0;
+  /* --pill-y is the dot's centre; the second translate re-centres the pill. */
+  transform: translateY(var(--pill-y)) translateY(-50%);
+  /* Overshoots at both ends: a small wind-up against the direction of travel,
+     then a bounce past the target before settling. */
+  transition: transform 620ms cubic-bezier(0.6, -0.28, 0.32, 1.28);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.nav-pill-body {
+  display: block;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.35);
+  /* Anchored at the dot end, so shrinking pulls the pill into the dot instead
+     of collapsing it towards its own middle. */
+  transform-origin: left center;
+  animation: pillTrip 620ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pillTrip {
+  0% {
+    transform: scale(1);
+  }
+  /* Swells out of the dot it's been sitting in. */
+  18% {
+    transform: scaleX(1.08) scaleY(1.1);
+  }
+  /* Tucked in for the ride — also where the text swaps over. */
+  46% {
+    transform: scaleX(0.7) scaleY(0.86);
+  }
+  /* Hits the next dot and flattens. */
+  74% {
+    transform: scaleX(1.12) scaleY(0.82);
+  }
+  88% {
+    transform: scaleX(0.96) scaleY(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-pill {
+    transition: none;
+  }
+
+  .nav-pill-body {
+    animation: none;
+  }
+
+  .nav-item.active .nav-dot {
+    transition-delay: 0s;
+  }
 }
 
 /* Hide on tablets and mobile */

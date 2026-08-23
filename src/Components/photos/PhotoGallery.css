@@ -52,7 +52,11 @@
   break-inside: avoid;
   display: block;
   overflow: hidden;
-  will-change: transform; /* GPU acceleration hint for smoother rendering */
+  /* No will-change here on purpose. It was pinning all ~22 cards into their own
+     compositor layers for the whole life of the page, which costs GPU memory
+     the gallery is already short of and keeps stale tiles alive. Chrome
+     promotes an element on its own for the duration of a transform transition,
+     so the hover stays smooth without it. */
 }
 
 .photo-item:not(.loading):not(.error) {

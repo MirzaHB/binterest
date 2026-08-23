@@ -346,6 +346,46 @@ const PhotoGallery: React.FC = () => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // These photos are 8–30 megapixels each, so their decoded bitmaps run to well
+  // over a gigabyte in total — far past what Chrome keeps in its decoded-image
+  // cache. It evicts them as you scroll, and because the <img> is decoding="async"
+  // the browser is free to paint a frame without the pixels rather than wait for
+  // the ~90ms re-decode. That frame is the blank card, and it stays blank until
+  // something dirties the tile — which is what hovering does.
+  //
+  // Re-decoding a little before the image reaches the viewport keeps a warm
+  // bitmap ready for the frame that actually needs it. onLoad can't do this job:
+  // it fired once, long before the eviction.
+  const decodeObserverRef = useRef<IntersectionObserver | null>(null);
+
+  const observeForDecode = useCallback((img: HTMLImageElement | null) => {
+    if (!img) return;
+    if (!decodeObserverRef.current) {
+      decodeObserverRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            // A no-op when the bitmap is still warm, so this costs nothing in
+            // the common case. Rejects if the src is swapped mid-decode.
+            (entry.target as HTMLImageElement).decode?.().catch(() => {});
+          });
+        },
+        // Far enough ahead that the decode has finished before the card is on
+        // screen, close enough that we aren't decoding the whole gallery at once.
+        { rootMargin: '600px 0px' }
+      );
+    }
+    const observer = decodeObserverRef.current;
+    observer.observe(img);
+    // Changing the column count re-parents every image, so these nodes are
+    // replaced far more often than the gallery unmounts. An IntersectionObserver
+    // keeps a strong reference to whatever it observes, so without this the
+    // detached ones pile up for the life of the page.
+    return () => observer.unobserve(img);
+  }, []);
+
+  useEffect(() => () => decodeObserverRef.current?.disconnect(), []);
+
   // Create a Map for O(1) photo index lookup instead of O(n) findIndex
   // Must be before early returns (React hooks rule)
   const photoIndexMap = useMemo(() => {
@@ -386,6 +426,23 @@ const PhotoGallery: React.FC = () => {
               // O(1) lookup instead of O(n) findIndex
               const globalIndex = photoIndexMap.get(photo.blobName) ?? 0;
 
+              // The originals are 8–30 megapixels. Rendered in a tile no wider
+              // than 440 CSS px they decode to roughly 1.6 GB of bitmap across the
+              // gallery, which overruns the browser's decoded-image cache and
+              // leaves cards painting blank until something forces a repaint.
+              // These are the same photos at 640w and 1280w: ~25 MB on a phone,
+              // ~101 MB on a desktop.
+              const srcSet = photo.thumbnails?.length
+                ? photo.thumbnails.map((t) => `${t.url} ${t.width}w`).join(', ')
+                : undefined;
+
+              // Fall back to the original for anything the resize function has
+              // not reached yet, and give the browser the largest derivative as
+              // the plain src so a no-srcset client still avoids the full size.
+              const largest = photo.thumbnails?.length
+                ? photo.thumbnails[photo.thumbnails.length - 1].url
+                : photo.url;
+
               return (
                 <div
                   key={photo.blobName || `photo-${photoIndex}`}
@@ -393,10 +450,15 @@ const PhotoGallery: React.FC = () => {
                   onClick={() => handlePhotoClick(photo)}
                 >
                   <img
-                    src={photo.url}
+                    src={largest}
+                    srcSet={srcSet}
+                    // Mirrors calculateColumnCount: two columns on phones, three
+                    // from tablet up, and a hard 440px once the 1400px cap bites.
+                    sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 440px"
                     alt={`Gallery item ${photoIndex + 1}`}
                     loading={globalIndex < 8 ? "eager" : "lazy"}
                     decoding="async"
+                    ref={observeForDecode}
                     onLoad={(e) => handleImageLoad(photo.blobName, e.currentTarget)}
                     style={{
                       width: '100%',
