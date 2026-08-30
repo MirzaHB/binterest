@@ -199,8 +199,65 @@
   border: 1px solid #f5c6cb;
 }
 
+.status-message.warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+/* Story field */
+
+.upload-story {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.upload-story-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.upload-story-optional {
+  font-weight: 400;
+  color: #888;
+}
+
+.upload-story-input {
+  width: 100%;
+  min-height: 140px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  color: #2d3748;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.upload-story-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.upload-story-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
+  .upload-story-input {
+    min-height: 110px;
+    font-size: 0.95rem;
+  }
+
   .photo-upload {
     margin: 20px;
     padding: 20px;
