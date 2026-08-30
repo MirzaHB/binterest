@@ -92,3 +92,34 @@ export const deletePhoto = async (blobName: string, accessToken: string): Promis
   const authenticatedClient = createAuthenticatedRequest(accessToken);
   await authenticatedClient.delete(`/photos/${blobName}`);
 };
+
+// The long-form text written about a single photo.
+//
+// Deliberately not part of the PhotoMetadata the gallery lists: PhotoGallery
+// caches that whole list in sessionStorage for the life of the tab, so a story
+// riding along in it would go stale the moment it was edited and stay stale.
+// Fetching per photo when the modal opens keeps edits visible immediately.
+interface PhotoStoryResponse {
+  story: string | null;
+}
+
+export const getPhotoStory = async (blobName: string): Promise<string | null> => {
+  const response = await apiClient.get<PhotoStoryResponse>(
+    `/photos/${encodeURIComponent(blobName)}/story`
+  );
+  return response.data.story;
+};
+
+// Saving an empty story removes it, so this doubles as the delete path.
+export const savePhotoStory = async (
+  blobName: string,
+  story: string,
+  accessToken: string
+): Promise<string | null> => {
+  const authenticatedClient = createAuthenticatedRequest(accessToken);
+  const response = await authenticatedClient.put<PhotoStoryResponse>(
+    `/photos/${encodeURIComponent(blobName)}/story`,
+    { story }
+  );
+  return response.data.story;
+};

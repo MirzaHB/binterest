@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { PhotoMetadata, deletePhoto } from '../../api/photo-api';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { PhotoMetadata, deletePhoto, getPhotoStory, savePhotoStory } from '../../api/photo-api';
 import { useAuth } from '../../auth/useAuth';
 import './PhotoModal.css';
 
@@ -17,6 +18,16 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomCenter, setZoomCenter] = useState({ x: 50, y: 50 });
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // The story is fetched per photo rather than arriving with the gallery list,
+  // so it starts unknown on every open. null means "no story"; undefined means
+  // "not loaded yet", which is what keeps the sidebar from flashing empty.
+  const [story, setStory] = useState<string | null | undefined>(undefined);
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [storyError, setStoryError] = useState<string | null>(null);
+
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { isAdmin, getAccessToken } = useAuth();
@@ -58,17 +69,95 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
     };
   }, [photo]);
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
+  const canEdit = isAdmin();
+
+  // Falls back to the "description" blob-metadata key for photos captioned
+  // before stories existed, so nothing written under the old scheme disappears.
+  const displayedStory = story ?? photo?.description ?? null;
+  const isDirty = draft !== (displayedStory ?? '');
+
+  useEffect(() => {
+    if (!photo) return;
+
+    // A different photo means a different story; drop any half-written draft
+    // rather than carrying it across to the wrong photo.
+    setStory(undefined);
+    setIsEditing(false);
+    setDraft('');
+    setStoryError(null);
+
+    let cancelled = false;
+    getPhotoStory(photo.blobName)
+      .then((text) => {
+        if (!cancelled) setStory(text);
+      })
+      .catch((error) => {
+        console.error('Failed to load photo story:', error);
+        // Leaving story undefined would keep the sidebar in a loading state
+        // forever; null just means the photo reads as having no story.
+        if (!cancelled) setStory(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [photo]);
+
+  const handleStartEditing = () => {
+    setDraft(displayedStory ?? '');
+    setStoryError(null);
+    setIsEditing(true);
+  };
+
+  const handleCancelEditing = useCallback(() => {
+    if (isDirty && !window.confirm('Discard your unsaved changes to this story?')) return;
+    setIsEditing(false);
+    setDraft('');
+    setStoryError(null);
+  }, [isDirty]);
+
+  const handleSaveStory = async () => {
+    if (!photo || !canEdit) return;
+
+    setIsSaving(true);
+    setStoryError(null);
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        setStoryError('Your session expired. Please sign in again.');
+        return;
+      }
+
+      // Saving an empty draft removes the story, so this is also the delete path.
+      const saved = await savePhotoStory(photo.blobName, draft, token);
+      setStory(saved);
+      setIsEditing(false);
+      setDraft('');
+    } catch (error) {
+      console.error('Failed to save photo story:', error);
+      setStoryError('Failed to save. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onClose();
-    }
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target !== e.currentTarget) return;
+    // Closing the modal unmounts the editor, taking the draft with it
+    if (isEditing && isDirty && !window.confirm('Discard your unsaved changes to this story?')) return;
+    onClose();
   };
+
+  // Escape backs out of the editor before it backs out of the modal, so it never
+  // discards a draft in one keystroke.
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key !== 'Escape') return;
+    if (isEditing) {
+      handleCancelEditing();
+      return;
+    }
+    onClose();
+  }, [isEditing, handleCancelEditing, onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -86,7 +175,7 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [isOpen, handleKeyDown]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!imageRef.current || !containerRef.current || isZoomed) return;
@@ -171,7 +260,7 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
           ×
         </button>
 
-        {isAdmin() && (
+        {canEdit && (
           <button
             className="photo-modal-delete"
             onClick={handleDelete}
@@ -179,6 +268,16 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
             title="Delete photo"
           >
             {isDeleting ? '...' : '🗑️'}
+          </button>
+        )}
+
+        {canEdit && !isEditing && (
+          <button
+            className="photo-modal-edit-story"
+            onClick={handleStartEditing}
+            title={displayedStory ? 'Edit this story' : 'Write a story for this photo'}
+          >
+            ✏️
           </button>
         )}
 
@@ -221,11 +320,54 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
             )}
           </div>
 
-          {photo?.description && (
+          {(isEditing || displayedStory || canEdit) && (
             <div className="photo-modal-sidebar">
-              <div className="photo-modal-description">
-                <p>{photo.description}</p>
-              </div>
+              {isEditing ? (
+                <div className="photo-modal-story-editor">
+                  <textarea
+                    className="photo-modal-story-input"
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    placeholder="Write the story behind this photo. Markdown works."
+                    autoFocus
+                    disabled={isSaving}
+                  />
+
+                  {storyError && <p className="photo-modal-story-error">{storyError}</p>}
+
+                  <div className="photo-modal-story-actions">
+                    <button
+                      className="photo-modal-story-save"
+                      onClick={handleSaveStory}
+                      disabled={isSaving || !isDirty}
+                    >
+                      {isSaving ? 'Saving…' : 'Save'}
+                    </button>
+                    <button
+                      className="photo-modal-story-cancel"
+                      onClick={handleCancelEditing}
+                      disabled={isSaving}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  {/* Clearing the box is the only way to remove a story, so say so */}
+                  <p className="photo-modal-story-hint">
+                    {draft.trim() ? 'Markdown supported.' : 'Saving an empty story removes it.'}
+                  </p>
+                </div>
+              ) : displayedStory ? (
+                <div className="photo-modal-description">
+                  <ReactMarkdown>{displayedStory}</ReactMarkdown>
+                </div>
+              ) : story === undefined ? (
+                <p className="photo-modal-story-empty">Loading…</p>
+              ) : (
+                // Only admins reach this branch — for everyone else the sidebar
+                // is not rendered at all when there is nothing to read.
+                <p className="photo-modal-story-empty">No story yet.</p>
+              )}
             </div>
           )}
         </div>
