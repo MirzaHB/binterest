@@ -11,6 +11,8 @@ interface Track {
 const MusicPlayer: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const wasPlayingRef = useRef(false);
+  const playerRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(0);
   const [volume, setVolume] = useState(0.3); // Start at 30% volume
@@ -85,6 +87,39 @@ const MusicPlayer: React.FC = () => {
     }
   }, [currentTrack]);
 
+  // Dismiss on a click anywhere else, the way a popover should behave.
+  //
+  // The toggle button has to be excluded as well as the panel: it sits outside
+  // the panel, so a click on it would otherwise be handled here first and close
+  // the player, and its own onClick would then immediately reopen it — leaving
+  // the button looking dead.
+  useEffect(() => {
+    if (!showPlayer) return;
+
+    const handlePointerDown = (event: Event) => {
+      const target = event.target as Node;
+      if (playerRef.current?.contains(target)) return;
+      if (toggleRef.current?.contains(target)) return;
+      setShowPlayer(false);
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowPlayer(false);
+    };
+
+    // mousedown rather than click so the panel closes as soon as the press
+    // lands; touchstart because a tap does not always emulate mousedown first.
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [showPlayer]);
+
   const togglePlay = () => {
     if (audioRef.current) {
       if (isPlaying) {
@@ -139,7 +174,7 @@ const MusicPlayer: React.FC = () => {
   return (
     <>
       {/* Music toggle button */}
-      <div className="music-toggle-container">
+      <div className="music-toggle-container" ref={toggleRef}>
         <button
           className="music-toggle-btn"
           onClick={() => setShowPlayer(!showPlayer)}
@@ -175,7 +210,12 @@ const MusicPlayer: React.FC = () => {
 
       {/* Music player panel */}
       {showPlayer && (
-        <div className="music-player">
+        <div
+          className="music-player"
+          ref={playerRef}
+          role="dialog"
+          aria-label="Background music player"
+        >
           <div className="music-player-header">
             <span className="music-title">🎶 Background Music</span>
             <button
