@@ -321,6 +321,28 @@ const PhotoGallery: React.FC = () => {
     };
   }, []);
 
+  // The caption now travels inside the photo list, which is cached in
+  // sessionStorage for the life of the tab — so a save has to update that cache
+  // too, or the edit would vanish on the next render and not come back until the
+  // tab was closed.
+  const handleDescriptionSaved = useCallback((blobName: string, description: string | null) => {
+    setPhotos((current) => {
+      const updated = current.map((photo) =>
+        photo.blobName === blobName ? { ...photo, description: description ?? undefined } : photo
+      );
+      sessionStorage.setItem('photoGallery_photos', JSON.stringify(updated));
+      return updated;
+    });
+
+    // The modal renders from the photo it was handed, so it needs the new text
+    // as well or it would keep showing the old caption until reopened.
+    setSelectedPhoto((current) =>
+      current && current.blobName === blobName
+        ? { ...current, description: description ?? undefined }
+        : current
+    );
+  }, []);
+
   // Photo click handler
   const handlePhotoClick = (photo: PhotoMetadata) => {
     setSelectedPhoto(photo);
@@ -455,7 +477,9 @@ const PhotoGallery: React.FC = () => {
                     // Mirrors calculateColumnCount: two columns on phones, three
                     // from tablet up, and a hard 440px once the 1400px cap bites.
                     sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 440px"
-                    alt={`Gallery item ${photoIndex + 1}`}
+                    // The caption is the only real description this image has;
+                    // "Gallery item 7" told a screen reader nothing.
+                    alt={photo.description || `Gallery photo ${globalIndex + 1}`}
                     loading={globalIndex < 8 ? "eager" : "lazy"}
                     decoding="async"
                     ref={observeForDecode}
@@ -481,6 +505,7 @@ const PhotoGallery: React.FC = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onDelete={handlePhotoDelete}
+        onDescriptionSaved={handleDescriptionSaved}
       />
     </div>
   );

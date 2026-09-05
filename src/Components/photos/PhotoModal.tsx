@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { PhotoMetadata, deletePhoto, getPhotoStory, savePhotoStory } from '../../api/photo-api';
+import { PhotoMetadata, deletePhoto, updatePhotoDescription } from '../../api/photo-api';
 import { useAuth } from '../../auth/useAuth';
 import './PhotoModal.css';
 
@@ -9,9 +8,12 @@ interface PhotoModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDelete?: () => void;
+  // The gallery owns the photo list and its sessionStorage cache, so a saved
+  // caption has to go back up rather than living only in here.
+  onDescriptionSaved?: (blobName: string, description: string | null) => void;
 }
 
-const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelete }) => {
+const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelete, onDescriptionSaved }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [imageMousPos, setImageMousePos] = useState({ x: 0, y: 0 });
   const [showMagnifier, setShowMagnifier] = useState(false);
@@ -19,14 +21,12 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
   const [zoomCenter, setZoomCenter] = useState({ x: 50, y: 50 });
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // The story is fetched per photo rather than arriving with the gallery list,
-  // so it starts unknown on every open. null means "no story"; undefined means
-  // "not loaded yet", which is what keeps the sidebar from flashing empty.
-  const [story, setStory] = useState<string | null | undefined>(undefined);
+  // The caption rides along in the photo list, so it is already here when the
+  // modal opens — no fetch, no loading state, nothing to flash.
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [storyError, setStoryError] = useState<string | null>(null);
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
 
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -71,71 +71,56 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
 
   const canEdit = isAdmin();
 
-  // Falls back to the "description" blob-metadata key for photos captioned
-  // before stories existed, so nothing written under the old scheme disappears.
-  const displayedStory = story ?? photo?.description ?? null;
-  const isDirty = draft !== (displayedStory ?? '');
+  const description = photo?.description ?? null;
+  const isDirty = draft !== (description ?? '');
 
+  // A different photo means a different caption; drop any half-written draft
+  // rather than carrying it across to the wrong photo.
   useEffect(() => {
-    if (!photo) return;
-
-    // A different photo means a different story; drop any half-written draft
-    // rather than carrying it across to the wrong photo.
-    setStory(undefined);
     setIsEditing(false);
     setDraft('');
-    setStoryError(null);
-
-    let cancelled = false;
-    getPhotoStory(photo.blobName)
-      .then((text) => {
-        if (!cancelled) setStory(text);
-      })
-      .catch((error) => {
-        console.error('Failed to load photo story:', error);
-        // Leaving story undefined would keep the sidebar in a loading state
-        // forever; null just means the photo reads as having no story.
-        if (!cancelled) setStory(null);
-      });
-
-    return () => {
-      cancelled = true;
-    };
+    setDescriptionError(null);
   }, [photo]);
 
   const handleStartEditing = () => {
-    setDraft(displayedStory ?? '');
-    setStoryError(null);
+    setDraft(description ?? '');
+    setDescriptionError(null);
     setIsEditing(true);
   };
 
   const handleCancelEditing = useCallback(() => {
-    if (isDirty && !window.confirm('Discard your unsaved changes to this story?')) return;
+    if (isDirty && !window.confirm('Discard your unsaved changes to this description?')) return;
     setIsEditing(false);
     setDraft('');
-    setStoryError(null);
+    setDescriptionError(null);
   }, [isDirty]);
 
-  const handleSaveStory = async () => {
+  const handleSaveDescription = async () => {
     if (!photo || !canEdit) return;
 
     setIsSaving(true);
-    setStoryError(null);
+    setDescriptionError(null);
     try {
       const token = await getAccessToken();
       if (!token) {
-        setStoryError('Your session expired. Please sign in again.');
+        setDescriptionError('Your session expired. Please sign in again.');
         return;
       }
 
-      // Saving an empty draft removes the story, so this is also the delete path.
-      const saved = await savePhotoStory(photo.blobName, draft, token);
-      setStory(saved);
+      // Saving an empty draft clears the caption, so this is also the delete path.
+      const saved = await updatePhotoDescription(photo.blobName, draft, token);
+      onDescriptionSaved?.(photo.blobName, saved);
       setIsEditing(false);
       setDraft('');
-    } catch (error) {
-      console.error('Failed to save photo story:', error);
-      setStoryError('Failed to save. Please try again.');
+    } catch (error: any) {
+      console.error('Failed to save description:', error);
+      // 409 means the resize function wrote first and the retries ran out —
+      // worth saying so, because trying again really does work.
+      setDescriptionError(
+        error?.response?.status === 409
+          ? 'That photo was being updated. Please try again.'
+          : 'Failed to save. Please try again.'
+      );
     } finally {
       setIsSaving(false);
     }
@@ -144,7 +129,7 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target !== e.currentTarget) return;
     // Closing the modal unmounts the editor, taking the draft with it
-    if (isEditing && isDirty && !window.confirm('Discard your unsaved changes to this story?')) return;
+    if (isEditing && isDirty && !window.confirm('Discard your unsaved changes to this description?')) return;
     onClose();
   };
 
@@ -273,9 +258,9 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
 
         {canEdit && !isEditing && (
           <button
-            className="photo-modal-edit-story"
+            className="photo-modal-edit-description"
             onClick={handleStartEditing}
-            title={displayedStory ? 'Edit this story' : 'Write a story for this photo'}
+            title={description ? 'Edit this description' : 'Write a description for this photo'}
           >
             ✏️
           </button>
@@ -293,7 +278,7 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
             <img
               ref={imageRef}
               src={displayUrl}
-              alt="Full size photo"
+              alt={description || 'Full size view'}
               className={`photo-modal-image ${isZoomed ? 'zoomed' : ''}`}
               style={isZoomed ? {
                 transform: `scale(2.5)`,
@@ -320,31 +305,32 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
             )}
           </div>
 
-          {(isEditing || displayedStory || canEdit) && (
+          {(isEditing || description || canEdit) && (
             <div className="photo-modal-sidebar">
               {isEditing ? (
-                <div className="photo-modal-story-editor">
+                <div className="photo-modal-description-editor">
                   <textarea
-                    className="photo-modal-story-input"
+                    className="photo-modal-description-input"
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
-                    placeholder="Write the story behind this photo. Markdown works."
+                    placeholder="Describe this photo."
+                    maxLength={1000}
                     autoFocus
                     disabled={isSaving}
                   />
 
-                  {storyError && <p className="photo-modal-story-error">{storyError}</p>}
+                  {descriptionError && <p className="photo-modal-description-error">{descriptionError}</p>}
 
-                  <div className="photo-modal-story-actions">
+                  <div className="photo-modal-description-actions">
                     <button
-                      className="photo-modal-story-save"
-                      onClick={handleSaveStory}
+                      className="photo-modal-description-save"
+                      onClick={handleSaveDescription}
                       disabled={isSaving || !isDirty}
                     >
                       {isSaving ? 'Saving…' : 'Save'}
                     </button>
                     <button
-                      className="photo-modal-story-cancel"
+                      className="photo-modal-description-cancel"
                       onClick={handleCancelEditing}
                       disabled={isSaving}
                     >
@@ -352,21 +338,21 @@ const PhotoModal: React.FC<PhotoModalProps> = ({ photo, isOpen, onClose, onDelet
                     </button>
                   </div>
 
-                  {/* Clearing the box is the only way to remove a story, so say so */}
-                  <p className="photo-modal-story-hint">
-                    {draft.trim() ? 'Markdown supported.' : 'Saving an empty story removes it.'}
+                  {/* Clearing the box is the only way to remove a caption, so say so */}
+                  <p className="photo-modal-description-hint">
+                    {draft.trim()
+                      ? `${draft.length}/1000`
+                      : 'Saving an empty description removes it.'}
                   </p>
                 </div>
-              ) : displayedStory ? (
+              ) : description ? (
                 <div className="photo-modal-description">
-                  <ReactMarkdown>{displayedStory}</ReactMarkdown>
+                  <p>{description}</p>
                 </div>
-              ) : story === undefined ? (
-                <p className="photo-modal-story-empty">Loading…</p>
               ) : (
                 // Only admins reach this branch — for everyone else the sidebar
                 // is not rendered at all when there is nothing to read.
-                <p className="photo-modal-story-empty">No story yet.</p>
+                <p className="photo-modal-description-empty">No description yet.</p>
               )}
             </div>
           )}

@@ -30,7 +30,8 @@ export const uploadPhoto = async (
   file: File,
   accessToken: string,
   width?: number,
-  height?: number
+  height?: number,
+  description?: string
 ): Promise<UploadResponse> => {
   const formData = new FormData();
   formData.append('file', file);
@@ -40,6 +41,11 @@ export const uploadPhoto = async (
   }
   if (height !== undefined) {
     formData.append('height', height.toString());
+  }
+  // Sent with the upload rather than in a follow-up call, so the caption cannot
+  // race the function that resizes the photo and rewrites its metadata.
+  if (description !== undefined && description.trim()) {
+    formData.append('description', description);
   }
 
   const authenticatedClient = createAuthenticatedRequest(accessToken);
@@ -93,33 +99,23 @@ export const deletePhoto = async (blobName: string, accessToken: string): Promis
   await authenticatedClient.delete(`/photos/${blobName}`);
 };
 
-// The long-form text written about a single photo.
-//
-// Deliberately not part of the PhotoMetadata the gallery lists: PhotoGallery
-// caches that whole list in sessionStorage for the life of the tab, so a story
-// riding along in it would go stale the moment it was edited and stay stale.
-// Fetching per photo when the modal opens keeps edits visible immediately.
-interface PhotoStoryResponse {
-  story: string | null;
+// Editing a caption on a photo that is already uploaded. There is no matching
+// read: the description ships with every photo in the list, so the gallery and
+// modal already have it.
+interface PhotoDescriptionResponse {
+  description: string | null;
 }
 
-export const getPhotoStory = async (blobName: string): Promise<string | null> => {
-  const response = await apiClient.get<PhotoStoryResponse>(
-    `/photos/${encodeURIComponent(blobName)}/story`
-  );
-  return response.data.story;
-};
-
-// Saving an empty story removes it, so this doubles as the delete path.
-export const savePhotoStory = async (
+// Saving an empty description clears it, so this doubles as the delete path.
+export const updatePhotoDescription = async (
   blobName: string,
-  story: string,
+  description: string,
   accessToken: string
 ): Promise<string | null> => {
   const authenticatedClient = createAuthenticatedRequest(accessToken);
-  const response = await authenticatedClient.put<PhotoStoryResponse>(
-    `/photos/${encodeURIComponent(blobName)}/story`,
-    { story }
+  const response = await authenticatedClient.put<PhotoDescriptionResponse>(
+    `/photos/${encodeURIComponent(blobName)}/description`,
+    { description }
   );
-  return response.data.story;
+  return response.data.description;
 };

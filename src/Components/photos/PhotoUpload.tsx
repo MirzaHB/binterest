@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { uploadPhoto, savePhotoStory } from '../../api/photo-api';
+import { uploadPhoto } from '../../api/photo-api';
 import { useAuth } from '../../auth/useAuth';
 import './PhotoUpload.css';
 
@@ -10,10 +10,7 @@ const PhotoUpload: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const [story, setStory] = useState('');
-  // The photo landed but its story did not — a different situation from a failed
-  // upload, and the only one where the text on screen is the sole copy.
-  const [storyWarning, setStoryWarning] = useState('');
+  const [description, setDescription] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
@@ -35,7 +32,6 @@ const PhotoUpload: React.FC = () => {
     const file = event.target.files?.[0];
     setError('');
     setStatusMessage('');
-    setStoryWarning('');
 
     if (!file) {
       setSelectedFile(null);
@@ -110,35 +106,14 @@ const PhotoUpload: React.FC = () => {
         // Continue without dimensions
       }
 
-      const response = await uploadPhoto(selectedFile, accessToken, width, height);
-
-      // Second request rather than part of the upload: the story is stored
-      // separately from the photo, so the photo is safely up either way.
-      if (story.trim()) {
-        try {
-          setStatusMessage('Saving your story...');
-          await savePhotoStory(response.blobName, story, accessToken);
-        } catch (storyError) {
-          console.error('Photo uploaded but story failed to save:', storyError);
-          // Deliberately keeps the text on screen: the photo is already up, so
-          // re-uploading would duplicate it, and this box holds the only copy.
-          setStatusMessage(`✅ ${response.message}`);
-          setStoryWarning(
-            'Your photo uploaded, but the story did not save. Copy the text below and add it from the gallery.'
-          );
-          setSelectedFile(null);
-          setPreviewUrl('');
-          if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-          }
-          return;
-        }
-      }
+      // The description travels with the upload, so there is no second request
+      // that can fail on its own and strand the text on screen.
+      const response = await uploadPhoto(selectedFile, accessToken, width, height, description);
 
       setStatusMessage(`✅ ${response.message}`);
       setSelectedFile(null);
       setPreviewUrl('');
-      setStory('');
+      setDescription('');
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -164,8 +139,7 @@ const PhotoUpload: React.FC = () => {
     setPreviewUrl('');
     setStatusMessage('');
     setError('');
-    setStory('');
-    setStoryWarning('');
+    setDescription('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -207,17 +181,18 @@ const PhotoUpload: React.FC = () => {
           </div>
         )}
 
-        {(selectedFile || storyWarning) && (
-          <div className="upload-story">
-            <label htmlFor="photo-story" className="upload-story-label">
-              Story <span className="upload-story-optional">(optional)</span>
+        {selectedFile && (
+          <div className="upload-description">
+            <label htmlFor="photo-description" className="upload-description-label">
+              Description <span className="upload-description-optional">(optional)</span>
             </label>
             <textarea
-              id="photo-story"
-              className="upload-story-input"
-              value={story}
-              onChange={(e) => setStory(e.target.value)}
-              placeholder="Write the story behind this photo. Markdown works. You can also add or change it later from the gallery."
+              id="photo-description"
+              className="upload-description-input"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe this photo. You can also add or change it later from the gallery."
+              maxLength={1000}
               disabled={uploading}
             />
           </div>
@@ -252,12 +227,6 @@ const PhotoUpload: React.FC = () => {
         {statusMessage && (
           <div className="status-message success">
             {statusMessage}
-          </div>
-        )}
-
-        {storyWarning && (
-          <div className="status-message warning">
-            ⚠️ {storyWarning}
           </div>
         )}
 
