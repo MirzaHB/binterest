@@ -1,0 +1,68 @@
+.mahoraga {
+  pointer-events: none;
+  user-select: none;
+  line-height: 0;
+}
+
+.mahoraga img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* The source gif is a crop out of a larger drawing, so its bottom and right
+     edges stop in a hard straight cut. Tilted, that reads as a torn rectangle -
+     fade both edges so he dissolves instead of stopping dead. */
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 0 56%, rgba(0, 0, 0, 0.5) 80%, transparent 99%),
+    linear-gradient(to right,  #000 0 74%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
+  mask-image:
+    linear-gradient(to bottom, #000 0 56%, rgba(0, 0, 0, 0.5) 80%, transparent 99%),
+    linear-gradient(to right,  #000 0 74%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+/* Animation by default, still frame only under reduced motion. Both selectors
+   are scoped through .mahoraga so they outrank `.mahoraga img`. */
+.mahoraga .mahoraga-still { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mahoraga .mahoraga-anim { display: none; }
+  .mahoraga .mahoraga-still { display: block; }
+}
+
+/* Light theme: he is pale line art drawn to sit on a grey ground, so he reads
+   much lighter here than on dark. Backing him with a vignette of that original
+   grey was tried and looked like a smudge between two clean cards - a small
+   brightness nudge keeps him crisp and lets the gold wheel carry the weight. */
+html:not(.dark-theme) .mahoraga img {
+  filter: brightness(0.9) saturate(1.1);
+}
+
+/* ---- grid variant: the empty third cell of row two ---- */
+.mahoraga--grid {
+  align-self: center;
+  justify-self: center;
+  width: 100%;
+  max-width: 280px;
+  transform: rotate(6deg);
+}
+
+/* ---- header variant: beside the "About Me" heading ---- */
+.mahoraga--header {
+  flex: 0 0 auto;
+  width: 84px;
+  transform: rotate(-6deg);
+}
+
+/* Show the grid figure only while the grid is genuinely three columns wide;
+   below that it would land in a side cell instead of the middle. */
+.mahoraga--header { display: none; }
+
+@media (max-width: 991px) {
+  .mahoraga--grid { display: none; }
+  .mahoraga--header { display: block; }
+}
+
+@media (max-width: 480px) {
+  .mahoraga--header { width: 68px; }
+}

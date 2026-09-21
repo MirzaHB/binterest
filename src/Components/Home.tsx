@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import TypewriterEffect from './TypewriterEffect';
 import ScrollNavigation from './ScrollNavigation';
 import ProjectCard from './projects/ProjectCard';
+import MahoragaFigure from './MahoragaFigure';
 import { getFeaturedProjects, PROJECTS } from '../data/projects';
 import './Home.css';
 import './TypewriterEffect.css';
@@ -64,7 +65,10 @@ const Home: React.FC = () => {
 
       <div id="about" className="about-section">
         <div className="section-header">
-          <h2>About Me</h2>
+          <div className="about-heading-row">
+            <MahoragaFigure variant="header" />
+            <h2>About Me</h2>
+          </div>
           <div className="section-line"></div>
         </div>
 
@@ -78,13 +82,7 @@ const Home: React.FC = () => {
               </p>
             </div>
 
-            <div className="about-card">
-              <span className="card-icon">⚙️</span>
-              <h3 className="card-title">Low-Level Enthusiast</h3>
-              <p className="card-description">
-                Low-level programming fascinates me - understanding the foundation of operating systems and modern languages empowers my coding approach.
-              </p>
-            </div>
+            <MahoragaFigure variant="grid" />
 
             <div className="about-card">
               <span className="card-icon">🌐</span>
@@ -107,6 +105,14 @@ const Home: React.FC = () => {
               <h3 className="card-title">Creative Problem Solver</h3>
               <p className="card-description">
                 Software engineering allows me to combine creativity and logic, which keeps me excited about the field every day.
+              </p>
+            </div>
+
+            <div className="about-card">
+              <span className="card-icon">⚙️</span>
+              <h3 className="card-title">Low-Level Enthusiast</h3>
+              <p className="card-description">
+                Low-level programming fascinates me - understanding the foundation of operating systems and modern languages empowers my coding approach.
               </p>
             </div>
           </div>

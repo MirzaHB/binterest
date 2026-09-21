@@ -199,6 +199,15 @@
   margin-bottom: 4rem;
 }
 
+/* Only the About header carries a figure; the other sections' headers are
+   untouched, so this stays scoped rather than living on .section-header. */
+.about-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
 .section-header h2 {
   font-size: 3rem;
   font-weight: 800;
