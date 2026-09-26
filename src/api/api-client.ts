@@ -1,8 +1,11 @@
 import axios, { AxiosInstance } from 'axios';
 
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+  || 'https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api';
+
 // Create API client without auth interceptor - auth will be handled manually
 const apiClient: AxiosInstance = axios.create({
-  baseURL: 'https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api',
+  baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -12,7 +15,7 @@ const apiClient: AxiosInstance = axios.create({
 // Create a function to create authenticated requests
 export const createAuthenticatedRequest = (token: string) => {
   return axios.create({
-    baseURL: 'https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api',
+    baseURL: API_BASE_URL,
     timeout: 30000,
     headers: {
       'Content-Type': 'application/json',

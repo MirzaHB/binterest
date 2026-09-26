@@ -19,10 +19,9 @@ declare global {
 }
 
 const CatToggle: React.FC = () => {
-  // public/oneko.js is a plain <script> in <body>, so it runs during parsing —
-  // before the CRA bundle, which is injected into <head> with defer. window.oneko
-  // is therefore always present by the time this mounts, in dev and in a
-  // production build alike, so these can read it directly.
+  // public/oneko.js is a plain <script> in <body>, so it runs during parsing,
+  // before the Vite entry module. window.oneko is therefore present by the
+  // time this mounts in development and production.
   const [available] = React.useState(() => window.oneko?.available ?? false);
   const [enabled, setEnabled] = React.useState(() => window.oneko?.isEnabled() ?? false);
   const [toast, setToast] = React.useState<string | null>(null);

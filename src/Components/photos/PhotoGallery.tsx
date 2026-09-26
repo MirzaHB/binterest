@@ -34,14 +34,14 @@ const PhotoGallery: React.FC = () => {
   const [imageHeights, setImageHeights] = useState<{[key: string]: number}>({});
   const imageHeightsRef = useRef<{[key: string]: number}>({});
   const galleryRef = useRef<HTMLDivElement>(null);
-  const redistributeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const redistributeTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const pendingHeightsRef = useRef<{[key: string]: number}>({});
-  const batchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const batchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const restoredFromCacheRef = useRef<Set<string>>(new Set());
   const photosRef = useRef<PhotoMetadata[]>([]);
   const hasLoadedRef = useRef(false);
   const isScrollingRef = useRef(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const pendingRedistribution = useRef(false);
 
   // Calculate optimal column count based on screen width
@@ -164,7 +164,7 @@ const PhotoGallery: React.FC = () => {
 
   // Handle window resize with debouncing
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const handleResize = () => {
       clearTimeout(timeoutId);

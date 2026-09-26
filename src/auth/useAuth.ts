@@ -1,5 +1,7 @@
 import React from 'react';
 import { useIsAuthenticated, useMsal, useAccount } from '@azure/msal-react';
+import { apiScopes } from './auth-config';
+import { API_BASE_URL } from '../api/api-client';
 
 export const useAuth = () => {
   const isAuthenticated = useIsAuthenticated();
@@ -27,7 +29,7 @@ export const useAuth = () => {
 
     try {
       const response = await instance.acquireTokenSilent({
-        scopes: [`api://${process.env.REACT_APP_MSAL_CLIENT_ID}/access_as_user`],
+        scopes: apiScopes,
         account: account,
       });
       return response.accessToken;
@@ -65,7 +67,7 @@ export const useAuth = () => {
         return null;
       }
 
-      const response = await fetch('https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api/user/info', {
+      const response = await fetch(`${API_BASE_URL}/user/info`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

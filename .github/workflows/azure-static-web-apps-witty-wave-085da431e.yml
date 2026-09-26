@@ -21,28 +21,28 @@ jobs:
           submodules: true
           lfs: false
 
-      - name: Show commit and list build contents
+      - name: Show commit and list project contents
         run: |
           echo "GITHUB_SHA=$GITHUB_SHA"
           git rev-parse --short HEAD || true
           ls -la
-          ls -la build || true
+          ls -la dist || true
 
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         env:
           CI: false
-          REACT_APP_MSAL_CLIENT_ID: ${{ secrets.REACT_APP_MSAL_CLIENT_ID }}
-          REACT_APP_MSAL_TENANT_ID: ${{ secrets.REACT_APP_MSAL_TENANT_ID }}
-          REACT_APP_MSAL_REDIRECT_URI: ${{ secrets.REACT_APP_MSAL_REDIRECT_URI }}
+          VITE_MSAL_CLIENT_ID: ${{ secrets.REACT_APP_MSAL_CLIENT_ID }}
+          VITE_MSAL_TENANT_ID: ${{ secrets.REACT_APP_MSAL_TENANT_ID }}
+          VITE_MSAL_REDIRECT_URI: ${{ secrets.REACT_APP_MSAL_REDIRECT_URI }}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WITTY_WAVE_085DA431E }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "/"
           api_location: ""
-          output_location: "build"
+          output_location: "dist"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

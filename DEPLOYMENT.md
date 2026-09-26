@@ -33,7 +33,7 @@ az staticwebapp create \
   --location "East US 2" \
   --branch main \
   --app-location "/" \
-  --output-location "build"
+  --output-location "dist"
 ```
 
 ### 2. Configure Environment Variables
@@ -41,10 +41,9 @@ az staticwebapp create \
 In Azure Portal → Static Web Apps → Configuration:
 
 ```
-REACT_APP_MSAL_CLIENT_ID=66619e58-2ae8-4228-ba4e-f3962c1d3ca7
-REACT_APP_MSAL_TENANT_ID=common
-REACT_APP_MSAL_REDIRECT_URI=https://your-app.azurestaticapps.net
-REACT_APP_API_URL=https://your-backend.azurewebsites.net
+VITE_MSAL_CLIENT_ID=66619e58-2ae8-4228-ba4e-f3962c1d3ca7
+VITE_MSAL_TENANT_ID=common
+VITE_MSAL_REDIRECT_URI=https://your-app.azurestaticapps.net
 ```
 
 ### 3. Update Azure AD App Registration
@@ -83,7 +82,7 @@ services.AddCors(options =>
 ### Proxy Configuration
 
 - ❌ `package.json` proxy doesn't work in production
-- ✅ Use environment-based API URLs
+- ✅ Vite exposes only variables prefixed with `VITE_`
 - ✅ Configure routing in `staticwebapp.config.json`
 
 ### API Routes

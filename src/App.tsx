@@ -11,12 +11,13 @@ import BlogUpload from './Components/blog/BlogUpload';
 import BlogPost from './Components/blog/BlogPost';
 import BlogEditor from './Components/blog/BlogEditor';
 import AdminRoute from './Components/auth/AdminRoute';
+import { API_BASE_URL } from './api/api-client';
 import './styles/darkTheme.css';
 
 const App: React.FC = () => {
   // Wake up the backend server on app load
   useEffect(() => {
-    fetch('https://bagelb0y-c6gfhyfsheebdzdm.canadacentral-01.azurewebsites.net/api/health/wake')
+    fetch(`${API_BASE_URL}/health/wake`)
       .catch(() => {
         // Silently fail - this is just to wake up the server
         console.log('Backend wake-up call initiated');
