@@ -78,6 +78,86 @@
   background: rgba(102, 126, 234, 0.3);
 }
 
+/* Auth dark styles */
+/* Account button and menu */
+.dark-theme .auth-button {
+  border-color: var(--border-color);
+}
+
+.dark-theme .auth-button:hover {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.dark-theme .auth-button.authenticated {
+  border-color: #48bb78;
+  background: rgba(72, 187, 120, 0.15);
+}
+
+.dark-theme .auth-button.authenticated:hover {
+  border-color: #48bb78;
+  background: rgba(72, 187, 120, 0.25);
+}
+
+.dark-theme .dropdown-menu {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  box-shadow: 0 8px 24px var(--shadow-color);
+}
+
+.dark-theme .dropdown-menu::before {
+  border-bottom-color: var(--bg-secondary);
+}
+
+.dark-theme .user-info {
+  border-bottom-color: var(--border-color);
+}
+
+.dark-theme .user-name {
+  color: var(--text-primary);
+}
+
+.dark-theme .user-email {
+  color: var(--text-muted);
+}
+
+.dark-theme .dropdown-divider {
+  background: var(--border-color);
+}
+
+.dark-theme .dropdown-item {
+  color: var(--text-secondary);
+}
+
+.dark-theme .dropdown-item:hover {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.dark-theme .logout-button:hover {
+  background: rgba(245, 101, 101, 0.2);
+  color: #fc8181;
+}
+
+/* Access-denied cards on admin routes */
+.dark-theme .access-card {
+  background: rgba(45, 55, 72, 0.8);
+  border-color: var(--border-color);
+  box-shadow: 0 8px 32px var(--shadow-color);
+}
+
+.dark-theme .access-card h2 {
+  color: var(--text-primary);
+}
+
+.dark-theme .access-card p {
+  color: var(--text-muted);
+}
+
+.dark-theme .access-hint {
+  background: rgba(26, 32, 44, 0.8);
+  color: var(--text-secondary);
+}
+
 /* Home page dark styles */
 .dark-theme .home-container {
   color: var(--text-primary);
@@ -310,6 +390,35 @@
   .dark-theme .photo-modal-sidebar {
     border-top-color: var(--border-color);
   }
+}
+
+/* PhotoModal caption editor. The textarea's light-mode text colour is the
+   dark modal's background colour, so typed text was invisible. */
+.dark-theme .photo-modal-description-input {
+  background: rgba(26, 32, 44, 0.6);
+  border-color: rgba(102, 126, 234, 0.45);
+  color: var(--text-primary);
+}
+
+.dark-theme .photo-modal-description-input::placeholder {
+  color: var(--text-muted);
+}
+
+.dark-theme .photo-modal-description-cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+.dark-theme .photo-modal-description-cancel:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.dark-theme .photo-modal-description-hint {
+  color: var(--text-muted);
+}
+
+.dark-theme .photo-modal-description-error {
+  color: #fc8181;
 }
 
 /* Cat toggle dark styles */
@@ -547,6 +656,108 @@
   background: #764ba2;
 }
 
+/* Markdown tables */
+.dark-theme .markdown-table {
+  background: rgba(45, 55, 72, 0.8);
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.dark-theme .markdown-th,
+.dark-theme .markdown-td {
+  border-bottom-color: var(--border-color);
+}
+
+.dark-theme .markdown-th {
+  background: rgba(26, 32, 44, 0.8);
+  color: var(--text-primary);
+}
+
+.dark-theme .markdown-td {
+  color: #cbd5e0;
+}
+
+.dark-theme .markdown-h1 {
+  border-bottom-color: var(--border-color);
+}
+
+/* BlogPost admin: metadata/content edit forms */
+.dark-theme .edit-form-container {
+  background: rgba(45, 55, 72, 0.8);
+  border-color: var(--border-color);
+}
+
+.dark-theme .edit-form h3 {
+  color: var(--text-primary);
+}
+
+/* Inputs get the BlogEditor dark fill otherwise, which barely differs from
+   this container */
+.dark-theme .edit-form-container .form-group input,
+.dark-theme .edit-form-container .form-group textarea {
+  background: rgba(26, 32, 44, 0.8);
+}
+
+/* BlogPost admin: photo management */
+.dark-theme .admin-photo-management {
+  background: rgba(102, 126, 234, 0.08);
+  border-color: rgba(102, 126, 234, 0.4);
+}
+
+.dark-theme .photo-management-title {
+  color: var(--text-primary);
+}
+
+.dark-theme .photo-management-info {
+  background: rgba(102, 126, 234, 0.15);
+  color: var(--text-secondary);
+}
+
+.dark-theme .photo-management-info code {
+  background: rgba(0, 0, 0, 0.3);
+  color: #a3bffa;
+}
+
+.dark-theme .photo-management-item {
+  background: var(--bg-secondary);
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.dark-theme .photo-management-header,
+.dark-theme .photo-url-container {
+  background: rgba(26, 32, 44, 0.6);
+  border-color: var(--border-color);
+}
+
+.dark-theme .photo-number {
+  color: var(--text-primary);
+}
+
+.dark-theme .photo-url-label {
+  color: var(--text-muted);
+}
+
+.dark-theme .photo-url-input {
+  background: var(--bg-primary);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+.dark-theme .photo-url-input:hover {
+  background: rgba(102, 126, 234, 0.15);
+}
+
+.dark-theme .photo-actions {
+  background: var(--bg-secondary);
+}
+
+.dark-theme .admin-photo-management .upload-placeholder {
+  background: rgba(26, 32, 44, 0.6);
+}
+
+.dark-theme .admin-photo-management .upload-placeholder:hover {
+  background: rgba(102, 126, 234, 0.2);
+}
+
 /* PhotoUpload dark styles */
 .dark-theme .photo-upload {
   background: rgba(45, 55, 72, 0.95);
@@ -598,6 +809,29 @@
   background: rgba(245, 101, 101, 0.2);
   color: #f56565;
   border-color: rgba(245, 101, 101, 0.4);
+}
+
+/* PhotoUpload story field */
+.dark-theme .upload-description-label {
+  color: var(--text-primary);
+}
+
+.dark-theme .upload-description-optional {
+  color: var(--text-muted);
+}
+
+.dark-theme .upload-description-input {
+  background: rgba(26, 32, 44, 0.8);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-theme .upload-description-input::placeholder {
+  color: var(--text-muted);
+}
+
+.dark-theme .upload-description-input:focus {
+  border-color: #667eea;
 }
 
 /* BlogUpload dark styles */
@@ -751,6 +985,31 @@
   background: rgba(102, 126, 234, 0.2);
   border-color: #667eea;
   color: var(--text-secondary);
+}
+
+/* BlogEditor / BlogUpload photo slots (scoped: .photo-placeholder is also a
+   gallery class) */
+.dark-theme .photo-upload-item .photo-placeholder {
+  background: rgba(26, 32, 44, 0.6);
+  border-color: var(--border-color);
+}
+
+.dark-theme .photo-upload-item .photo-placeholder:hover {
+  background: rgba(102, 126, 234, 0.15);
+  border-color: #667eea;
+}
+
+.dark-theme .photo-upload-item .photo-text {
+  color: var(--text-primary);
+}
+
+.dark-theme .photo-upload-item .photo-hint {
+  color: var(--text-muted);
+}
+
+.dark-theme .photo-upload-item .photo-preview {
+  background: var(--bg-primary);
+  border-color: var(--border-color);
 }
 
 /* Mobile Navigation Dark Theme */

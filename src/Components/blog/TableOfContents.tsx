@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { scrollTopFor, scrollToHeading } from './headings';
 import './TableOfContents.css';
 
 interface Heading {
@@ -8,41 +9,38 @@ interface Heading {
 }
 
 interface TableOfContentsProps {
+  // The rendered post body; headings (and their ids) are read from here
+  containerRef: React.RefObject<HTMLElement | null>;
+  // Re-read the headings whenever the post content changes
   content: string;
 }
 
-const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
+const TableOfContents: React.FC<TableOfContentsProps> = ({ containerRef, content }) => {
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState<string>('');
 
   useEffect(() => {
-    // Extract headings from markdown content
-    const extractedHeadings: Heading[] = [];
-    const lines = content.split('\n');
+    // Read from the DOM rather than re-parsing the markdown, so every entry
+    // uses exactly the id BlogPost rendered
+    const container = containerRef.current;
+    if (!container) return;
 
-    lines.forEach((line) => {
-      const match = line.match(/^(#{1,6})\s+(.+)$/);
-      if (match) {
-        const level = match[1].length;
-        const text = match[2].trim();
-        // Simple clean ID from heading text: "Introduction" -> "introduction"
-        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-        extractedHeadings.push({ id, text, level });
-      }
-    });
-
-    setHeadings(extractedHeadings);
-  }, [content]);
+    const elements = container.querySelectorAll<HTMLElement>('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
+    setHeadings(Array.from(elements, (element) => ({
+      id: element.id,
+      text: element.textContent ?? '',
+      level: Number(element.tagName[1]),
+    })));
+  }, [containerRef, content]);
 
   useEffect(() => {
     // Track scroll position to highlight active section
     const handleScroll = () => {
       const headingElements = headings.map(h => document.getElementById(h.id));
-      const scrollPosition = window.scrollY + 100; // Offset for header
 
       for (let i = headingElements.length - 1; i >= 0; i--) {
         const element = headingElements[i];
-        if (element && element.offsetTop <= scrollPosition) {
+        if (element && scrollTopFor(element) <= window.scrollY) {
           setActiveId(headings[i].id);
           break;
         }
@@ -55,21 +53,14 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [headings]);
 
-  const scrollToHeading = (id: string) => {
+  const goToHeading = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      // Calculate position with offset to keep title visible
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - 100;
+      scrollToHeading(element, 'smooth');
 
-      // Smooth scroll to position
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-
-      // Update URL without adding to browser history
-      window.history.replaceState(null, '', `#${id}`);
+      // Update URL without adding to browser history. Keep React Router's
+      // history state; replacing it with null breaks its back/forward tracking.
+      window.history.replaceState(window.history.state, '', `#${id}`);
     }
   };
 
@@ -82,14 +73,14 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
           <div
             key={heading.id}
             className={`toc-item ${activeId === heading.id ? 'active' : ''}`}
-            onClick={() => scrollToHeading(heading.id)}
+            onClick={() => goToHeading(heading.id)}
             data-level={heading.level}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                scrollToHeading(heading.id);
+                goToHeading(heading.id);
               }
             }}
           >

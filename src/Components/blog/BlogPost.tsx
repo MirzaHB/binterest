@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { getBlog, getBlogContent, deleteBlog, updateBlog, updateBlogContent, uploadBlogPhoto, deleteBlogPhoto, BlogPost as BlogPostType, formatBlogDate, parseTags } from '../../api/blog-api';
 import { useAuth } from '../../auth/useAuth';
 import TableOfContents from './TableOfContents';
+import { rehypeHeadingIds, scrollToHeading } from './headings';
 import './BlogPost.css';
 
 const BlogPost: React.FC = () => {
@@ -33,6 +34,36 @@ const BlogPost: React.FC = () => {
 
     loadBlogPost();
   }, [id]);
+
+  const contentRef = useRef<HTMLDivElement>(null);
+  const scrolledToHashFor = useRef<string | null>(null);
+
+  // Shared section links (/blog/my-post#setup): the browser's own jump to the
+  // hash happens before the post has loaded, so do it once the headings exist.
+  useEffect(() => {
+    const container = contentRef.current;
+    const hash = window.location.hash.slice(1);
+    if (loading || !container || !hash || scrolledToHashFor.current === id) return;
+    scrolledToHashFor.current = id ?? null;
+
+    const target = document.getElementById(hash);
+    if (!target || !container.contains(target)) return;
+    scrollToHeading(target);
+
+    // Photos above the heading load afterwards and push it down the page, so
+    // keep it lined up until they settle or the reader scrolls on their own.
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => scrollToHeading(target));
+    observer.observe(container);
+
+    const userEvents = ['wheel', 'touchstart', 'keydown', 'mousedown'] as const;
+    const stop = () => {
+      observer.disconnect();
+      userEvents.forEach((type) => window.removeEventListener(type, stop));
+    };
+    userEvents.forEach((type) => window.addEventListener(type, stop, { passive: true }));
+    return stop;
+  }, [loading, id]);
 
   const loadBlogPost = async () => {
     if (!id) return;
@@ -233,17 +264,9 @@ const BlogPost: React.FC = () => {
     );
   }
 
-  // Helper function to generate heading IDs - must match TableOfContents.tsx logic
-  const generateHeadingId = (children: any): string => {
-    const text = typeof children === 'string' ? children : children?.toString() || '';
-    // Simple clean ID: "Introduction" -> "introduction"
-    const id = text.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-    return id;
-  };
-
   return (
     <div className="blog-post-container">
-      <TableOfContents content={content} />
+      <TableOfContents containerRef={contentRef} content={content} />
 
       <div className="blog-post-header">
         <div className="blog-post-actions">
@@ -482,35 +505,18 @@ const BlogPost: React.FC = () => {
         )}
       </div>
 
-      <div className="blog-post-content">
+      <div className="blog-post-content" ref={contentRef}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeHeadingIds]}
           components={{
-            // Custom components for better styling with IDs for navigation
-            h1: ({children}) => {
-              const id = generateHeadingId(children);
-              return <h1 id={id} className="markdown-h1">{children}</h1>;
-            },
-            h2: ({children}) => {
-              const id = generateHeadingId(children);
-              return <h2 id={id} className="markdown-h2">{children}</h2>;
-            },
-            h3: ({children}) => {
-              const id = generateHeadingId(children);
-              return <h3 id={id} className="markdown-h3">{children}</h3>;
-            },
-            h4: ({children}) => {
-              const id = generateHeadingId(children);
-              return <h4 id={id} className="markdown-h4">{children}</h4>;
-            },
-            h5: ({children}) => {
-              const id = generateHeadingId(children);
-              return <h5 id={id} className="markdown-h5">{children}</h5>;
-            },
-            h6: ({children}) => {
-              const id = generateHeadingId(children);
-              return <h6 id={id} className="markdown-h6">{children}</h6>;
-            },
+            // Custom components for better styling; heading ids come from rehypeHeadingIds
+            h1: ({children, id}) => <h1 id={id} className="markdown-h1">{children}</h1>,
+            h2: ({children, id}) => <h2 id={id} className="markdown-h2">{children}</h2>,
+            h3: ({children, id}) => <h3 id={id} className="markdown-h3">{children}</h3>,
+            h4: ({children, id}) => <h4 id={id} className="markdown-h4">{children}</h4>,
+            h5: ({children, id}) => <h5 id={id} className="markdown-h5">{children}</h5>,
+            h6: ({children, id}) => <h6 id={id} className="markdown-h6">{children}</h6>,
             p: ({children}) => <p className="markdown-p">{children}</p>,
             code: ({children, className}) => {
               const isInline = !className;
