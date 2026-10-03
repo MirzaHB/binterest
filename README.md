@@ -1,6 +1,15 @@
 # Binterest
 
 Hassan Baig's React and TypeScript portfolio, built with Vite and deployed to Azure Static Web Apps.
+Live at <https://hassanbaig.ca>.
+
+## Demo
+
+[![Portfolio demo: click to watch](docs/portfolio-demo-poster.jpg)](docs/portfolio-demo.mp4)
+
+▶️ **[Watch the demo](docs/portfolio-demo.mp4)** (1:43): the About page, photo gallery and
+blog, then signing in as admin to upload a captioned photo, write and delete a blog post,
+and remove the photo again.
 
 ## Local development
 
