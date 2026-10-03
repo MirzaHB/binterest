@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { uploadPhoto } from '../../api/photo-api';
 import { useAuth } from '../../auth/useAuth';
+import MahoragaLoader from '../MahoragaLoader';
 import './PhotoUpload.css';
 
 const PhotoUpload: React.FC = () => {
@@ -108,9 +109,16 @@ const PhotoUpload: React.FC = () => {
 
       // The description travels with the upload, so there is no second request
       // that can fail on its own and strand the text on screen.
-      const response = await uploadPhoto(selectedFile, accessToken, width, height, description);
+      await uploadPhoto(selectedFile, accessToken, width, height, description);
 
-      setStatusMessage(`✅ ${response.message}`);
+      // Anything that is not already AVIF gets converted by ProcessPhotoOnUpload
+      // after the upload returns, and the gallery cannot show it until that
+      // finishes — so say so, or a quick trip to the gallery looks like a failure.
+      setStatusMessage(
+        selectedFile.type === 'image/avif'
+          ? '✅ Uploaded. It is in the gallery now.'
+          : '✅ Uploaded. It is being converted and will appear in the gallery in a few seconds.'
+      );
       setSelectedFile(null);
       setPreviewUrl('');
       setDescription('');
@@ -218,13 +226,10 @@ const PhotoUpload: React.FC = () => {
         )}
 
         {uploading && (
-          <div className="uploading-state">
-            <div className="upload-spinner"></div>
-            <p>{statusMessage || 'Uploading your photo...'}</p>
-          </div>
+          <MahoragaLoader label={statusMessage || 'Uploading your photo…'} size="compact" />
         )}
 
-        {statusMessage && (
+        {statusMessage && !uploading && (
           <div className="status-message success">
             {statusMessage}
           </div>

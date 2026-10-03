@@ -9,6 +9,7 @@ import {
   getTagCounts,
   filterBlogsByTag,
 } from '../api/blog-api';
+import MahoragaLoader from './MahoragaLoader';
 import './Blog.css';
 
 const Blog: React.FC = () => {
@@ -81,9 +82,7 @@ const Blog: React.FC = () => {
   if (loading) {
     return (
       <div className="blog-container">
-        <div className="blog-loading">
-          <h2>Loading blog posts...</h2>
-        </div>
+        <MahoragaLoader label="Loading blog posts…" />
       </div>
     );
   }

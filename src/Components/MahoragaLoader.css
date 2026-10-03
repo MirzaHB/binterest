@@ -1,0 +1,73 @@
+.mahoraga-loader {
+  /* Same gold as the wheel in the About Me animation, with a dark bronze
+     outline so it holds its shape on the light theme's pale backgrounds. */
+  --wheel-gold: #d4af37;
+  --wheel-outline: #6b4f12;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.mahoraga-loader--page {
+  min-height: 50vh;
+  padding: 40px 16px;
+}
+
+.mahoraga-loader--compact {
+  padding: 20px 16px;
+}
+
+.mahoraga-wheel {
+  display: block;
+  overflow: visible;
+  animation: mahoraga-wheel-spin 8s linear infinite;
+}
+
+.mahoraga-loader--page .mahoraga-wheel { width: 112px; height: 112px; }
+.mahoraga-loader--compact .mahoraga-wheel { width: 64px; height: 64px; }
+
+.mahoraga-wheel-outline,
+.mahoraga-wheel-gold {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.mahoraga-wheel-gold { stroke: var(--wheel-gold); }
+.mahoraga-wheel-outline { stroke: var(--wheel-outline); }
+
+/* The outline copy is 3 units wider, leaving a 1.5-unit edge either side. */
+.mahoraga-wheel-gold .mahoraga-wheel-spoke { stroke-width: 5; }
+.mahoraga-wheel-gold .mahoraga-wheel-rim { stroke-width: 6; }
+.mahoraga-wheel-gold .mahoraga-wheel-inner { stroke-width: 4; }
+.mahoraga-wheel-outline .mahoraga-wheel-spoke { stroke-width: 8; }
+.mahoraga-wheel-outline .mahoraga-wheel-rim { stroke-width: 9; }
+.mahoraga-wheel-outline .mahoraga-wheel-inner { stroke-width: 7; }
+
+.mahoraga-wheel-knob,
+.mahoraga-wheel-hub {
+  fill: var(--wheel-gold);
+  stroke: var(--wheel-outline);
+  stroke-width: 2.5;
+}
+
+.mahoraga-wheel-hub-cap {
+  fill: var(--wheel-outline);
+}
+
+.mahoraga-loader-label {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-muted, #666);
+}
+
+@keyframes mahoraga-wheel-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mahoraga-wheel { animation: none; }
+}

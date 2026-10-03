@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../auth/useAuth';
+import MahoragaLoader from '../MahoragaLoader';
 import './ProtectedRoute.css';
 
 interface AdminRouteProps {
@@ -33,7 +34,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children, fallback }) => {
     return (
       <div className="protected-route-message">
         <div className="access-card">
-          <p>Loading…</p>
+          <MahoragaLoader label="Loading…" size="compact" />
         </div>
       </div>
     );

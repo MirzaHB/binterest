@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { getPhotos, PhotoMetadata } from '../../api/photo-api';
 import PhotoModal from './PhotoModal';
+import MahoragaLoader from '../MahoragaLoader';
 import './PhotoGallery.css';
 
 interface Column {
@@ -206,51 +207,72 @@ const PhotoGallery: React.FC = () => {
     setColumnCount(initialCols);
   }, []);
 
-  // Load all photos with sessionStorage caching
+  // Swaps in a list fresh from the API. `shown` is the serialized list already
+  // on screen, if any: when nothing changed the layout is left alone, so the
+  // common case of revisiting an unchanged gallery never jumps.
+  const applyFreshPhotos = useCallback((photoData: PhotoMetadata[], shown: string | null) => {
+    const serialized = JSON.stringify(photoData);
+    if (serialized === shown) return;
+
+    sessionStorage.setItem('photoGallery_photos', serialized);
+
+    // Drop heights for photos that are gone. Converting a JPEG to AVIF renames
+    // the blob, so without this every upload would strand an entry here.
+    const live = new Set(photoData.map((p) => p.blobName));
+    const heights = Object.fromEntries(
+      Object.entries(imageHeightsRef.current).filter(([blobName]) => live.has(blobName))
+    );
+    imageHeightsRef.current = heights;
+    setImageHeights(heights);
+    sessionStorage.setItem('photoGallery_heights', JSON.stringify(heights));
+
+    setPhotos(photoData);
+    setColumns(distributePhotosToColumns(photoData));
+  }, [distributePhotosToColumns]);
+
+  // Shows the sessionStorage copy straight away, then always refetches behind
+  // it. The copy used to be final for the life of the tab, so a photo uploaded
+  // after the gallery's first visit never appeared — and neither did the rename
+  // ProcessPhotoOnUpload makes when it converts an upload to AVIF, which left
+  // a card pointing at a blob that had been deleted.
   const loadAllPhotos = useCallback(async () => {
-    try {
+    setError(null);
+
+    const cachedPhotos = sessionStorage.getItem('photoGallery_photos');
+    const cachedHeights = sessionStorage.getItem('photoGallery_heights');
+    const restored = Boolean(cachedPhotos && cachedHeights);
+
+    if (restored) {
+      const photos = JSON.parse(cachedPhotos!);
+      const heights = JSON.parse(cachedHeights!);
+
+      // Mark these blobNames so onLoad handlers skip them (they're already measured)
+      restoredFromCacheRef.current = new Set(photos.map((p: PhotoMetadata) => p.blobName));
+
+      setPhotos(photos);
+      setImageHeights(heights);
+      imageHeightsRef.current = heights;
+
+      // Redistribute with cached heights
+      setColumns(distributePhotosToColumns(photos));
+      setLoading(false);
+    } else {
       setLoading(true);
-      setError(null);
+    }
 
-      // Try to restore from sessionStorage first
-      const cachedPhotos = sessionStorage.getItem('photoGallery_photos');
-      const cachedHeights = sessionStorage.getItem('photoGallery_heights');
-
-      if (cachedPhotos && cachedHeights) {
-        const photos = JSON.parse(cachedPhotos);
-        const heights = JSON.parse(cachedHeights);
-
-        // Mark these blobNames so onLoad handlers skip them (they're already measured)
-        restoredFromCacheRef.current = new Set(photos.map((p: PhotoMetadata) => p.blobName));
-
-        setPhotos(photos);
-        setImageHeights(heights);
-        imageHeightsRef.current = heights;
-
-        // Redistribute with cached heights
-        setColumns(distributePhotosToColumns(photos));
-
-        setLoading(false);
-
-        return;
-      }
-
-      // Otherwise fetch from API
-      const photoData = await getPhotos(10000, 0);
-      setPhotos(photoData);
-
-      // Cache in sessionStorage
-      sessionStorage.setItem('photoGallery_photos', JSON.stringify(photoData));
-
-      // Initial redistribution with estimated heights
-      setColumns(distributePhotosToColumns(photoData));
+    try {
+      applyFreshPhotos(await getPhotos(10000, 0), restored ? cachedPhotos : null);
     } catch (error) {
       console.error('Failed to load photos:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load photos');
+      // With a cached list on screen, a failed refresh is not worth an error
+      // page — the visitor still has a working gallery, just a slightly old one.
+      if (!restored) {
+        setError(error instanceof Error ? error.message : 'Failed to load photos');
+      }
     } finally {
       setLoading(false);
     }
-  }, [distributePhotosToColumns]);
+  }, [distributePhotosToColumns, applyFreshPhotos]);
 
   // Handle image load - store actual height in ref and trigger batched redistribution
   const handleImageLoad = useCallback((blobName: string, element: HTMLImageElement) => {
@@ -419,7 +441,7 @@ const PhotoGallery: React.FC = () => {
   }, [photos]);
 
   if (loading) {
-    return <div className="loading">Loading photos…</div>;
+    return <MahoragaLoader label="Loading photos…" />;
   }
 
   if (error) {

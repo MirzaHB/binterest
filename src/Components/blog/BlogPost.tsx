@@ -6,6 +6,7 @@ import { getBlog, getBlogContent, deleteBlog, updateBlog, updateBlogContent, upl
 import { useAuth } from '../../auth/useAuth';
 import TableOfContents from './TableOfContents';
 import { rehypeHeadingIds, scrollToHeading } from './headings';
+import MahoragaLoader from '../MahoragaLoader';
 import './BlogPost.css';
 
 const BlogPost: React.FC = () => {
@@ -243,9 +244,7 @@ const BlogPost: React.FC = () => {
   if (loading) {
     return (
       <div className="blog-post-container">
-        <div className="blog-post-loading">
-          <h2>Loading blog post...</h2>
-        </div>
+        <MahoragaLoader label="Loading blog post…" />
       </div>
     );
   }
