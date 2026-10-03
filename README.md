@@ -1,6 +1,6 @@
 # Binterest
 
-Hassan Baig's React and TypeScript portfolio, built with Vite and deployed to Azure Static Web Apps.
+Hassan Baig's portfolio website frontend.
 Live at <https://hassanbaig.ca>.
 
 ## Demo
